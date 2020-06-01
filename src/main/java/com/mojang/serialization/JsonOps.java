@@ -21,12 +21,32 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+/**
+ * A {@link DynamicOps} adapter for JSON. Instances of this class serialize data to and from
+ * JSON.
+ */
 public class JsonOps implements DynamicOps<JsonElement> {
+    /**
+     * The singleton {@link JsonOps} instance for uncompressed JSON serialization.
+     *
+     * @see #compressMaps()
+     */
     public static final JsonOps INSTANCE = new JsonOps(false);
+
+    /**
+     * The singleton {@link JsonOps} instance for compressed JSON serialization.
+     *
+     * @see #compressMaps()
+     */
     public static final JsonOps COMPRESSED = new JsonOps(true);
 
     private final boolean compressed;
 
+    /**
+     * Constructs a {@link JsonOps} with the given settings.
+     *
+     * @param compressed Whether this {@link JsonOps} should use compressed serialization.
+     */
     protected JsonOps(final boolean compressed) {
         this.compressed = compressed;
     }
@@ -313,6 +333,9 @@ public class JsonOps implements DynamicOps<JsonElement> {
         return input;
     }
 
+    /**
+     * Returns a {@link String} identifying this {@link DynamicOps} as a {@link JsonOps}.
+     */
     @Override
     public String toString() {
         return "JSON";
@@ -381,6 +404,12 @@ public class JsonOps implements DynamicOps<JsonElement> {
         }
     }
 
+    /**
+     * @inheritDoc
+     * @implSpec This implementation returns whether this object uses compressed serialization.
+     * @see #INSTANCE
+     * @see #COMPRESSED
+     */
     @Override
     public boolean compressMaps() {
         return compressed;
