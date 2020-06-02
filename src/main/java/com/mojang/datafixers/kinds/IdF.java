@@ -5,30 +5,69 @@ package com.mojang.datafixers.kinds;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+/**
+ * A container for a single value.
+ *
+ * @param <A> The type of the contained value.
+ */
 public final class IdF<A> implements App<IdF.Mu, A> {
+    /**
+     * The witness type of {@link IdF}.
+     */
     public static final class Mu implements K1 {}
 
+    /**
+     * The value contained in this {@code IdF}.
+     */
     protected final A value;
 
     IdF(final A value) {
         this.value = value;
     }
 
+    /**
+     * Gets the value of this container.
+     *
+     * @return The value.
+     */
     public A value() {
         return value;
     }
 
+    /**
+     * Gets the value stored in an {@link App} representing an {@code IdF} instance.
+     *
+     * @param box The boxed {@code IdF} instance.
+     * @param <A> The type of the contained value.
+     * @throws ClassCastException If the {@code box} is not an instance of {@code IdF}.
+     */
     public static <A> A get(final App<Mu, A> box) {
         return ((IdF<A>) box).value;
     }
 
+    /**
+     * Creates an {@code IdF} container for a value.
+     *
+     * @param a   The value that will be stored.
+     * @param <A> The type of the contained value.
+     * @return The created container.
+     */
     public static <A> IdF<A> create(final A a) {
         return new IdF<>(a);
     }
 
+    /**
+     * An instance of {@link Functor} and {@link Applicative} for {@link IdF}.
+     */
     public enum Instance implements Functor<Mu, Instance.Mu>, Applicative<Mu, Instance.Mu> {
+        /**
+         * The singleton instance of this type.
+         */
         INSTANCE;
 
+        /**
+         * The witness type of {@code IdF.Instance}.
+         */
         public static final class Mu implements Functor.Mu, Applicative.Mu {}
 
         @Override
