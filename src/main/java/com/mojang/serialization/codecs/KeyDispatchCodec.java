@@ -30,7 +30,7 @@ public class KeyDispatchCodec<K, V> extends MapCodec<V> {
     }
 
     /**
-     * Assumes codec(type(V)) is Codec<V>
+     * Assumes {@code codec(type(V))} is {@code Codec<V>}
      */
     public KeyDispatchCodec(final String typeKey, final Codec<K> keyCodec, final Function<? super V, ? extends DataResult<? extends K>> type, final Function<? super K, ? extends DataResult<? extends Codec<? extends V>>> codec) {
         this(typeKey, keyCodec, type, codec, v -> getCodec(type, codec, v));
