@@ -6,9 +6,10 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
- * A container for a single value.
+ * A container wrapping a single value.
  *
  * @param <A> The type of the contained value.
+ * @apiNote This class represents the <em>identity functor</em>, hence the name {@code IdF}.
  */
 public final class IdF<A> implements App<IdF.Mu, A> {
     /**
