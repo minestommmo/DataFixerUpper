@@ -405,7 +405,8 @@ public class JsonOps implements DynamicOps<JsonElement> {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
+     *
      * @implSpec This implementation returns whether this object uses compressed serialization.
      * @see #INSTANCE
      * @see #COMPRESSED

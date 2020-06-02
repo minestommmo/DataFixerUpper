@@ -32,16 +32,16 @@ public interface TypeTemplate {
     }
 
     /**
-     * returned optic will accept template<family<index>> with the input template, and will return the same with the returned template
-     * (template, optic) = Left(result)
-     * this.apply(family).apply(index) == optic.sType
-     * template.apply(family).apply(index) == optic.tType
+     * returned optic will accept {@code template<family<index>>} with the input template, and will return the same with the returned template.
+     * <p>{@code (template, optic) = Left(result)}
+     * <p>{@code this.apply(family).apply(index) == optic.sType}
+     * <p>{@code template.apply(family).apply(index) == optic.tType}
      */
     <A, B> Either<TypeTemplate, Type.FieldNotFoundException> findFieldOrType(final int index, @Nullable String name, Type<A> type, Type<B> resultType);
 
     /**
-     * constraint: family, argFamily and resFamily are matched
-     * result.function(i) :: this.apply(function.argFamily()).apply(i) -> this.apply(function.resFamily()).apply(i)
+     * constraint: family, argFamily and resFamily are matched.
+     * <p>{@code result.function(i) :: this.apply(function.argFamily()).apply(i) -> this.apply(function.resFamily()).apply(i)}
      */
     IntFunction<RewriteResult<?, ?>> hmap(final TypeFamily family, final IntFunction<RewriteResult<?, ?>> function);
 
