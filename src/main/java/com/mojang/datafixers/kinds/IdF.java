@@ -8,8 +8,14 @@ import java.util.function.Function;
 /**
  * A container wrapping a single value.
  *
+ * <p>The main feature of this class is its {@linkplain IdF.Instance implementation} of
+ * {@linkplain Applicative applicative functor} operations. It's useful in cases where a functor is required
+ * but there is no existing functor that would be used.
+ *
  * @param <A> The type of the contained value.
  * @apiNote This class represents the <em>identity functor</em>, hence the name {@code IdF}.
+ * @see <a href="https://en.wikipedia.org/wiki/Monad_(functional_programming)#Identity_monad">Identity monads,
+ * a similar concept for the monad type class</a>
  */
 public final class IdF<A> implements App<IdF.Mu, A> {
     /**
