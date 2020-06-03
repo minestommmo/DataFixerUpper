@@ -110,7 +110,7 @@ Some types in DFU should be displayed using a custom rendering. For example, the
 rendered as `(A) -> B` in the generated documentation. For appropriate types, insert a block-level `@dfu.shape`
 tag so that the type is rendered properly.
 
-For reference on the format of `@dfu.shape` template strings, see the wiki.
+For reference on the format of `@dfu.shape` template strings, [see the wiki](https://github.com/kvverti/Documented-DataFixerUpper/wiki/Custom-type-shapes-with-@dfu.shape).
 
 ## Method Documentation
 
