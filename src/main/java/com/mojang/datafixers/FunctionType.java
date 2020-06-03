@@ -24,23 +24,68 @@ import javax.annotation.Nonnull;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * A function from an input type to an output type. This type is identical to {@link Function}, except that this
+ * type defines type class instances.
+ *
+ * @param <A> The input type.
+ * @param <B> The output type.
+ */
 public interface FunctionType<A, B> extends Function<A, B>, App2<FunctionType.Mu, A, B>, App<FunctionType.ReaderMu<A>, B> {
+    /**
+     * The witness type for {@link FunctionType}.
+     */
     final class Mu implements K2 {}
 
+    /**
+     * The witness type for the partially applied {@link FunctionType FunctionType&lt;A, _&gt;}
+     *
+     * @param <A> The input type.
+     */
     final class ReaderMu<A> implements K1 {}
 
+    /**
+     * Converts a {@link Function} to a {@link FunctionType}.
+     *
+     * @param function The function.
+     * @param <A>      The input type.
+     * @param <B>      The output type.
+     * @return {@code function}, as an instance of {@link FunctionType}.
+     */
     static <A, B> FunctionType<A, B> create(final Function<? super A, ? extends B> function) {
         return function::apply;
     }
 
+    /**
+     * Thunk method that casts an applied {@link Mu} to the type {@link FunctionType}.
+     *
+     * @param box The boxed {@link FunctionType}.
+     * @param <A> The function input type.
+     * @param <B> The function output type.
+     * @return The casted function.
+     */
     static <A, B> Function<A, B> unbox(final App2<Mu, A, B> box) {
         return (FunctionType<A, B>) box;
     }
 
+    /**
+     * Thunk method that casts an applied {@link ReaderMu} to the type {@link FunctionType}.
+     *
+     * @param box The boxed {@link FunctionType}.
+     * @param <A> The function input type.
+     * @param <B> The function output type.
+     * @return The casted function.
+     */
     static <A, B> Function<A, B> unbox(final App<ReaderMu<A>, B> box) {
         return (FunctionType<A, B>) box;
     }
 
+    /**
+     * Applies this function to the input.
+     *
+     * @param a The input value.
+     * @return A result value.
+     */
     @Override
     @Nonnull
     B apply(@Nonnull A a);
