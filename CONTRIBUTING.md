@@ -104,6 +104,14 @@ public class DynamicOps<T> {
 }
 ```
 
+### Type Shapes
+
+Some types in DFU should be displayed using a custom rendering. For example, the type `FunctionType<A, B>` is
+rendered as `(A) -> B` in the generated documentation. For appropriate types, insert a block-level `@dfu.shape`
+tag so that the type is rendered properly.
+
+For reference on the format of `@dfu.shape` template strings, see the wiki.
+
 ## Method Documentation
 
 Methods should be fully documented with `@param` and `@return` tags, except for "simple properties". Throws clauses
