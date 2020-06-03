@@ -20,6 +20,8 @@ import java.util.function.Function;
 public final class IdF<A> implements App<IdF.Mu, A> {
     /**
      * The witness type of {@link IdF}.
+     *
+     * @dfu.shape %.Mu.[%^1]
      */
     public static final class Mu implements K1 {}
 

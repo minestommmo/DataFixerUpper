@@ -14,6 +14,7 @@ import java.util.function.Function;
  *
  * @param <T>  The container type.
  * @param <Mu> The witness type for this traversable.
+ * @dfu.shape %.Type. %0
  * @see Applicative
  */
 public interface Traversable<T extends K1, Mu extends Traversable.Mu> extends Functor<T, Mu> {
@@ -31,6 +32,8 @@ public interface Traversable<T extends K1, Mu extends Traversable.Mu> extends Fu
 
     /**
      * The witness type for {@link Traversable}.
+     *
+     * @dfu.shape %.Mu. %^1
      */
     interface Mu extends Functor.Mu {}
 

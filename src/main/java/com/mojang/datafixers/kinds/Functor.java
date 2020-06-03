@@ -10,6 +10,7 @@ import java.util.function.Function;
  *
  * @param <F>  The container type.
  * @param <Mu> The witness type of this functor.
+ * @dfu.shape %.Type. %0
  * @see <a href="https://en.wikipedia.org/wiki/Functor_(functional_programming)">The functor type class</a>
  */
 public interface Functor<F extends K1, Mu extends Functor.Mu> extends Kind1<F, Mu> {
@@ -28,6 +29,8 @@ public interface Functor<F extends K1, Mu extends Functor.Mu> extends Kind1<F, M
 
     /**
      * The witness type of a functor.
+     *
+     * @dfu.shape %.Mu. %^1
      */
     interface Mu extends Kind1.Mu {}
 

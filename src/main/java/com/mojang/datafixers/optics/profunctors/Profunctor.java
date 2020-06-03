@@ -20,12 +20,14 @@ import java.util.function.Supplier;
  *
  * @param <P>  The container type.
  * @param <Mu> The witness type for this profunctor.
+ * @dfu.shape %.Type. %0
  * @see <a href="https://typeclasses.com/profunctors">Understanding profunctors</a>
  */
 public interface Profunctor<P extends K2, Mu extends Profunctor.Mu> extends Kind2<P, Mu> {
     /**
      * The witness type of a {@link Profunctor}.
      *
+     * @dfu.shape %.Mu. %^1
      * @see #TYPE_TOKEN
      */
     interface Mu extends Kind2.Mu {

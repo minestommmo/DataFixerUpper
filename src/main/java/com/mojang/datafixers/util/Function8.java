@@ -15,6 +15,7 @@ import java.util.function.Function;
  * @param <T7> The seventh parameter type.
  * @param <T8> The eighth parameter type.
  * @param <R>  The return value.
+ * @dfu.shape "(%0,%1,%2,%3,%4,%5,%6,%7) %.->. %8"
  */
 public interface Function8<T1, T2, T3, T4, T5, T6, T7, T8, R> {
     /**

@@ -27,6 +27,7 @@ import java.util.function.Function;
  *
  * @param <F>  The container type.
  * @param <Mu> The witness type of this applicative functor.
+ * @dfu.shape %.Type.% %0
  */
 public interface Applicative<F extends K1, Mu extends Applicative.Mu> extends Functor<F, Mu> {
     /**
@@ -44,6 +45,8 @@ public interface Applicative<F extends K1, Mu extends Applicative.Mu> extends Fu
 
     /**
      * The witness type of an applicative functor.
+     *
+     * @dfu.shape %.Mu.% %^1
      */
     interface Mu extends Functor.Mu {}
 

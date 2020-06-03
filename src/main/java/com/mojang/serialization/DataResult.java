@@ -25,6 +25,8 @@ import java.util.function.UnaryOperator;
 public class DataResult<R> implements App<DataResult.Mu, R> {
     /**
      * A marker interface representing the type constructor {@link DataResult}.
+     *
+     * @dfu.shape %.Mu.[%^1]
      */
     public static final class Mu implements K1 {}
 

@@ -12,6 +12,7 @@ import java.util.function.Function;
  * @param <T4> The fourth parameter type.
  * @param <T5> The fifth parameter type.
  * @param <R>  The return value.
+ * @dfu.shape "(%0,%1,%2,%3,%4) %.->. %5"
  */
 public interface Function5<T1, T2, T3, T4, T5, R> {
     /**

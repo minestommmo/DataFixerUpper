@@ -30,10 +30,13 @@ import java.util.function.Supplier;
  *
  * @param <A> The input type.
  * @param <B> The output type.
+ * @dfu.shape "(%0) %.->. %1"
  */
 public interface FunctionType<A, B> extends Function<A, B>, App2<FunctionType.Mu, A, B>, App<FunctionType.ReaderMu<A>, B> {
     /**
      * The witness type for {@link FunctionType}.
+     *
+     * @dfu.shape "(%^1) %.->. %^2"
      */
     final class Mu implements K2 {}
 
@@ -41,6 +44,7 @@ public interface FunctionType<A, B> extends Function<A, B>, App2<FunctionType.Mu
      * The witness type for the partially applied {@link FunctionType FunctionType&lt;A, _&gt;}
      *
      * @param <A> The input type.
+     * @dfu.shape "(%0) %.->. %^1"
      */
     final class ReaderMu<A> implements K1 {}
 

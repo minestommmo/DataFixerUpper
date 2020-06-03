@@ -10,6 +10,7 @@ import java.util.function.Function;
  * @param <T2> The second parameter type.
  * @param <T3> The third parameter type.
  * @param <R>  The return value.
+ * @dfu.shape "(%0,%1,%2) %.->. %3"
  */
 public interface Function3<T1, T2, T3, R> {
     /**

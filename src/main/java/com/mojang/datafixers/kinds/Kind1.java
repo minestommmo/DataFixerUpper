@@ -14,6 +14,7 @@ import com.mojang.datafixers.Products;
  * @param <F>  The witness type for the type constructor this type class is defined for.
  * @param <Mu> The witness type for this type class.
  * @apiNote This interface is called {@link Kind1} because it operates on types of the kind {@link K1}.
+ * @dfu.shape %.Type. %0
  * @see Kind2
  * @see K1
  * @see <a href="https://en.wikipedia.org/wiki/Type_class">Type class</a>
@@ -33,6 +34,8 @@ public interface Kind1<F extends K1, Mu extends Kind1.Mu> extends App<Mu, F> {
 
     /**
      * The witness type of a {@link Kind1}.
+     *
+     * @dfu.shape %.Mu. %^1
      */
     interface Mu extends K1 {}
 

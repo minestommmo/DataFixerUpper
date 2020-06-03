@@ -17,6 +17,7 @@ import java.util.function.Function;
  * @param <T9>  The ninth parameter type.
  * @param <T10> The tenth parameter type.
  * @param <R>   The return value.
+ * @dfu.shape "(%0,%1,%2,%3,%4,%5,%6,%7,%8,%9) %.->. %10"
  */
 public interface Function10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R> {
     /**
