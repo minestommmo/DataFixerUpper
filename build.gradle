@@ -43,7 +43,7 @@ dependencies {
 }
 
 javadoc {
-    options.links = [
+    ((StandardJavadocDocletOptions)options).links = [
             "https://docs.oracle.com/javase/8/docs/api/",
             "https://javadoc.io/doc/com.google.code.findbugs/jsr305/3.0.2/",
             "https://www.javadoc.io/doc/com.google.code.gson/gson/2.8.0/",
@@ -51,7 +51,7 @@ javadoc {
             "https://guava.dev/releases/21.0/api/docs/",
             "https://commons.apache.org/proper/commons-lang/javadocs/api-3.5/"
     ]
-    options.tags = [
+    ((StandardJavadocDocletOptions)options).tags = [
             "apiNote:a:API Note:",
             "implSpec:a:Implementation Requirements:",
             "implNote:a:Implementation Note:",
@@ -63,6 +63,48 @@ javadoc {
             "serialData",
             "see"
     ]
+    ((CoreJavadocOptions)options).addMultilineMultiValueOption("shape").setValue([
+            ["java.util.function.BiConsumer", "(%0,%1) %.->. void"],
+            ["java.util.function.BiFunction", "(%0,%1) %.->. %2"],
+            ["java.util.function.BinaryOperator", "(%0,%0) %.->. %0"],
+            ["java.util.function.BooleanSupplier", "() %.->. boolean"],
+            ["java.util.function.Consumer", "(%0) %.->. void"],
+            ["java.util.function.DoubleBinaryOperator", "(double, double) %.->. double"],
+            ["java.util.function.DoubleConsumer", "(double) %.->. void"],
+            ["java.util.function.DoubleFunction", "(double) %.->. %1"],
+            ["java.util.function.DoublePredicate", "(double) %.->. boolean"],
+            ["java.util.function.DoubleSupplier", "() %.->. double"],
+            ["java.util.function.DoubleToIntFunction", "(double) %.->. int"],
+            ["java.util.function.DoubleToLongFunction", "(double) %.->. long"],
+            ["java.util.function.DoubleUnaryOperator", "(double) %.->. double"],
+            ["java.util.function.Function", "(%0) %.->. %1"],
+            ["java.util.function.IntBinaryOperator", "(int,int) %.->. int"],
+            ["java.util.function.IntConsumer", "(int) %.->. void"],
+            ["java.util.function.IntPredicate", "(int) %.->. boolean"],
+            ["java.util.function.IntSupplier", "() %.->. int"],
+            ["java.util.function.IntToDoubleFunction", "(int) %.->. double"],
+            ["java.util.function.IntToLongFunction", "(int) %.->. long"],
+            ["java.util.function.IntUnaryOperator", "(int) %.->. int"],
+            ["java.util.function.LongBinaryOperator", "(long,long) %.->. long"],
+            ["java.util.function.LongConsumer", "(long) %.->. void"],
+            ["java.util.function.LongPredicate", "(long) %.->. boolean"],
+            ["java.util.function.LongSupplier", "() %.->. long"],
+            ["java.util.function.LongToDoubleFunction", "(long) %.->. double"],
+            ["java.util.function.LongToIntFunction", "(long) %.->. int"],
+            ["java.util.function.LongUnaryOperator", "(long) %.->. long"],
+            ["java.util.function.ObjDoubleConsumer", "(%0,double) %.->. void"],
+            ["java.util.function.ObjIntConsumer", "(%0,int) %.->. void"],
+            ["java.util.function.ObjLongConsumer", "(%0,long) %.->. void"],
+            ["java.util.function.Predicate", "(%0) %.->. boolean"],
+            ["java.util.function.Supplier", "() %.->. %0"],
+            ["java.util.function.ToDoubleBiFunction", "(%0,%1) %.->. double"],
+            ["java.util.function.ToDoubleFunction", "(%0) %.->. double"],
+            ["java.util.function.ToIntBiFunction", "(%0,%1) %.->. int"],
+            ["java.util.function.ToIntFunction", "(%0) %.->. int"],
+            ["java.util.function.ToLongBiFunction", "(%0,%1) %.->. long"],
+            ["java.util.function.ToLongFunction", "(%0) %.->. long"],
+            ["java.util.function.UnaryOperator", "(%0) %.->. %0"],
+    ])
 }
 
 task sourcesJar(type: Jar) {
