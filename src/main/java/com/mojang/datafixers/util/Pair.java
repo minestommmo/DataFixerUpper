@@ -14,9 +14,29 @@ import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+/**
+ * A <em>product type</em> containing two values.
+ *
+ * @param <F> The type of the first value.
+ * @param <S> The type of the second value.
+ */
 public class Pair<F, S> implements App<Pair.Mu<S>, F> {
+    /**
+     * The witness type for {@link Pair}. The represents the partially applied type constructor {@code Pair<_,S>}.
+     *
+     * @param <S> The type of the second value.
+     * @dfu.shape %.Mu.[%^1,%0]
+     */
     public static final class Mu<S> implements K1 {}
 
+    /**
+     * Thunk method to cast an applied {@link Pair.Mu} to a {@link Pair}.
+     *
+     * @param box The boxed pair.
+     * @param <F> The type of the first value.
+     * @param <S> The type of the second value.
+     * @return The unboxed pair.
+     */
     public static <F, S> Pair<F, S> unbox(final App<Mu<S>, F> box) {
         return (Pair<F, S>) box;
     }
@@ -24,19 +44,35 @@ public class Pair<F, S> implements App<Pair.Mu<S>, F> {
     private final F first;
     private final S second;
 
+    /**
+     * Constructs a pair with the given values.
+     *
+     * @param first  The first value.
+     * @param second The second value.
+     * @see #of(Object, Object)
+     */
     public Pair(final F first, final S second) {
         this.first = first;
         this.second = second;
     }
 
+    /**
+     * The first value.
+     */
     public F getFirst() {
         return first;
     }
 
+    /**
+     * The second value.
+     */
     public S getSecond() {
         return second;
     }
 
+    /**
+     * Returns a pair with the elements of this pair swapped.
+     */
     public Pair<S, F> swap() {
         return of(second, first);
     }
@@ -60,23 +96,67 @@ public class Pair<F, S> implements App<Pair.Mu<S>, F> {
         return com.google.common.base.Objects.hashCode(first, second);
     }
 
+    /**
+     * Transforms the first element of this pair to another type.
+     *
+     * @param function The transformation.
+     * @param <F2>     The new type of the first element.
+     * @return A pair with the transformed first element.
+     * @apiNote This method implements the <em>functor operator</em> for the first element of {@link Pair}.
+     * @see Instance#map(Function, App)
+     */
     public <F2> Pair<F2, S> mapFirst(final Function<? super F, ? extends F2> function) {
         return of(function.apply(first), second);
     }
 
+    /**
+     * Transforms the second element of this pair to another type.
+     *
+     * @param function The transformation.
+     * @param <S2>     The new type of the second element.
+     * @return A pair with the transformed second element.
+     * @apiNote This method implements the <em>functor operator</em> for the second element of {@link Pair}.
+     */
     public <S2> Pair<F, S2> mapSecond(final Function<? super S, ? extends S2> function) {
         return of(first, function.apply(second));
     }
 
+    /**
+     * Creates a pair with the given values.
+     *
+     * @param first  The first value.
+     * @param second The second value.
+     * @param <F>    The type of the first value.
+     * @param <S>    The type of the second value.
+     * @return A pair containing the given values.
+     */
     public static <F, S> Pair<F, S> of(final F first, final S second) {
         return new Pair<>(first, second);
     }
 
+    /**
+     * Returns a {@link Collector} that collects pairs into a {@link Map}, using the first value as the key
+     * in the map and the second value as the value in the map.
+     *
+     * @param <F> The type of the first value.
+     * @param <S> The type of the second value.
+     * @return A {@link Collector} that transforms a stream of {@link Pair} into a {@link Map}.
+     */
     public static <F, S> Collector<Pair<F, S>, ?, Map<F, S>> toMap() {
         return Collectors.toMap(Pair::getFirst, Pair::getSecond);
     }
 
+    /**
+     * The {@link CartesianLike} type class instance for {@link Pair}.
+     *
+     * @param <S2> The type of the pair's second element.
+     */
     public static final class Instance<S2> implements Traversable<Mu<S2>, Instance.Mu<S2>>, CartesianLike<Mu<S2>, S2, Instance.Mu<S2>> {
+        /**
+         * The witness type of {@link Instance}.
+         *
+         * @param <S2> The type of the pair's second element.
+         */
         public static final class Mu<S2> implements Traversable.Mu, CartesianLike.Mu {}
 
         @Override
