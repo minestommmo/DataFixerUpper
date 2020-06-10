@@ -30,6 +30,13 @@ repositories {
         url "https://libraries.minecraft.net"
     }
     mavenCentral()
+    maven {
+        url "https://jitpack.io"
+    }
+}
+
+configurations {
+    jaxDoclet
 }
 
 dependencies {
@@ -40,10 +47,15 @@ dependencies {
     compile 'org.apache.commons:commons-lang3:3.5'
     compile 'it.unimi.dsi:fastutil:7.1.0'
     testCompile 'junit:junit-dep:4.10'
+    jaxDoclet 'com.github.kvverti:dfu-jd-doclet:1.0.0'
 }
 
 javadoc {
-    options.overview = "src/main/resources/overview.html"
+    options {
+        docletpath = configurations.jaxDoclet.files as List
+        doclet = "com.outerthoughts.html5doclet.standard.Standard"
+        overview = "src/main/resources/overview.html"
+    }
     ((StandardJavadocDocletOptions)options).links = [
             "https://docs.oracle.com/javase/8/docs/api/",
             "https://javadoc.io/doc/com.google.code.findbugs/jsr305/3.0.2/",
