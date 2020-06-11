@@ -567,6 +567,7 @@ public interface DynamicOps<T> {
      * to serialize maps as a list of values keyed by index.
      * @implSpec The default implementation returns {@code false}. Implementations should override the default
      * and return {@code true} if callers would gain space savings by compressing maps before serializing them.
+     * @see KeyCompressor
      */
     default boolean compressMaps() {
         return false;
