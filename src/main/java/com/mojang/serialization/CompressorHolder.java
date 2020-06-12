@@ -6,6 +6,12 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 
 import java.util.Map;
 
+/**
+ * Abstract base class for {@link Compressable} objects. This class provides a default implementation of the method
+ * {@link #compressor(DynamicOps)}.
+ *
+ * @implNote This class internally caches {@link KeyCompressor} objects generated from different serialization forms.
+ */
 public abstract class CompressorHolder implements Compressable {
     private final Map<DynamicOps<?>, KeyCompressor<?>> compressors = new Object2ObjectArrayMap<>();
 
