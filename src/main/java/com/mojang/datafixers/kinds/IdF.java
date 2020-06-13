@@ -67,6 +67,8 @@ public final class IdF<A> implements App<IdF.Mu, A> {
 
     /**
      * An instance of {@link Functor} and {@link Applicative} for {@link IdF}.
+     *
+     * @dfu.shape instance %.Mu.[_]
      */
     public enum Instance implements Functor<Mu, Instance.Mu>, Applicative<Mu, Instance.Mu> {
         /**
@@ -76,6 +78,8 @@ public final class IdF<A> implements App<IdF.Mu, A> {
 
         /**
          * The witness type of {@code IdF.Instance}.
+         *
+         * @dfu.shape instance %^1
          */
         public static final class Mu implements Functor.Mu, Applicative.Mu {}
 

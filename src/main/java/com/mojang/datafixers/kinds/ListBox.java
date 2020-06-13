@@ -85,12 +85,16 @@ public final class ListBox<T> implements App<ListBox.Mu, T> {
 
     /**
      * The {@link Traversable} type class instance for {@link ListBox}.
+     *
+     * @dfu.shape instance %.Mu.[_]
      */
     public enum Instance implements Traversable<Mu, Instance.Mu> {
         INSTANCE;
 
         /**
          * The witness type of {@link Instance}.
+         *
+         * @dfu.shape instance %^1
          */
         public static final class Mu implements Traversable.Mu {}
 

@@ -539,6 +539,7 @@ public class DataResult<R> implements App<DataResult.Mu, R> {
     /**
      * The <em>applicative functor</em> type instance for the type constructor {@link DataResult}.
      *
+     * @dfu.shape instance %.Mu.[_]
      * @see <a href="https://medium.com/@lettier/your-easy-guide-to-monads-applicatives-functors-862048d61610">Functors, Applicatives, and Monads</a>
      */
     public enum Instance implements Applicative<Mu, Instance.Mu> {
@@ -549,6 +550,8 @@ public class DataResult<R> implements App<DataResult.Mu, R> {
 
         /**
          * A marker class representing the meta-type constructor {@link DataResult.Instance}.
+         *
+         * @dfu.shape instance %^1
          */
         public static final class Mu implements Applicative.Mu {}
 
