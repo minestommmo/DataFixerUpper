@@ -115,7 +115,7 @@ public interface Decoder<A> {
      * many different fields, all using different decoders, from a single record.
      *
      * @param name The field to decode objects from.
-     * @return A {@link MapDecoder} that performs the same decoding as this encoder, but takes the serialized value
+     * @return A {@link MapDecoder} that performs the same decoding as this decoder, but takes the serialized value
      * from a record under the given field.
      * @implSpec The default implementation returns a {@link FieldDecoder} wrapping this decoder.
      * @see MapLike

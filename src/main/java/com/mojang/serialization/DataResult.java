@@ -41,7 +41,8 @@ public class DataResult<R> implements App<DataResult.Mu, R> {
     private final Lifecycle lifecycle;
 
     /**
-     * Creates a successful {@link DataResult} with the given result value.
+     * Creates a successful {@link DataResult} with the given result value. The lifecycle of the result
+     * is {@linkplain Lifecycle#experimental() experimental}.
      *
      * @param result The result value.
      * @param <R>    The type of the result value.

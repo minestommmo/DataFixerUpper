@@ -31,7 +31,30 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+/**
+ * A combined {@link Decoder} and {@link Encoder}.
+ *
+ * <p>A {@link Codec} handles transformation of a specific type to and from a provided serialized form. Codecs
+ * encapsulate both the behaviors of an encoder and those of a decoder in the same object.
+ *
+ * <p>Implementations of {@link Codec} are immutable once created. The methods defined in this interface never
+ * mutate the codec in a way visible to the outside.
+ *
+ * @param <A> The type this {@link Codec} serializes and deserializes.
+ * @implNote The default methods in this interface that return codecs or {@linkplain MapCodec map codecs}
+ * wrap this codec without adding any debugging context. These methods should be overridden if deeply nested
+ * codecs are undesirable or additional debugging context is desired.
+ * @see MapCodec
+ */
 public interface Codec<A> extends Encoder<A>, Decoder<A> {
+    /**
+     * Sets the {@link Lifecycle} for any result data this codec produces.
+     *
+     * @param lifecycle the lifecycle to use.
+     * @return An codec equivalent to this codec but with the given lifecycle.
+     * @implSpec The default implementation returns another {@link Codec} that wraps this codec.
+     * @see Lifecycle
+     */
     @Override
     default Codec<A> withLifecycle(final Lifecycle lifecycle) {
         return new Codec<A>() {
@@ -52,18 +75,47 @@ public interface Codec<A> extends Encoder<A>, Decoder<A> {
         };
     }
 
+    /**
+     * Returns an equivalent {@link Codec} with the {@linkplain Lifecycle#stable() stable} lifecycle.
+     *
+     * @see Lifecycle#stable()
+     */
     default Codec<A> stable() {
         return withLifecycle(Lifecycle.stable());
     }
 
+    /**
+     * Returns an equivalent {@link Codec} with a {@linkplain Lifecycle#deprecated(int) deprecated} lifecycle.
+     *
+     * @param since The deprecation version.
+     * @see Lifecycle#deprecated(int)
+     */
     default Codec<A> deprecated(final int since) {
         return withLifecycle(Lifecycle.deprecated(since));
     }
 
+    /**
+     * Combines an {@link Encoder} and a {@link Decoder} into a {@link Codec}.
+     *
+     * @param encoder The {@link Encoder} defining the returned codec.
+     * @param decoder The {@link Decoder} defining the returned codec.
+     * @param <A>     The type the returned codec operates on.
+     * @return A codec that combines the given encoder and decoder.
+     */
     static <A> Codec<A> of(final Encoder<A> encoder, final Decoder<A> decoder) {
         return of(encoder, decoder, "Codec[" + encoder + " " + decoder + "]");
     }
 
+    /**
+     * Combines an {@link Encoder} and a {@link Decoder} into a named {@link Codec}.
+     *
+     * @param encoder The {@link Encoder} defining the returned codec.
+     * @param decoder The {@link Decoder} defining the returned codec.
+     * @param name    The name given in the string representation of the returned codec.
+     * @param <A>     The type the returned codec operates on.
+     * @return A codec that combines the given encoder and decoder.
+     * @see #of(Encoder, Decoder)
+     */
     static <A> Codec<A> of(final Encoder<A> encoder, final Decoder<A> decoder, final String name) {
         return new Codec<A>() {
             @Override
@@ -83,10 +135,29 @@ public interface Codec<A> extends Encoder<A>, Decoder<A> {
         };
     }
 
+    /**
+     * Combines a {@link MapEncoder} and a {@link MapDecoder} into a {@link MapCodec}.
+     *
+     * @param encoder The {@link MapEncoder} defining the returned {@link MapCodec}.
+     * @param decoder The {@link MapDecoder} defining the returned {@link MapCodec}.
+     * @param <A>     The type the returned codec operates on.
+     * @return A {@link MapCodec} combining the given encoder and decoder.
+     */
     static <A> MapCodec<A> of(final MapEncoder<A> encoder, final MapDecoder<A> decoder) {
         return of(encoder, decoder, "MapCodec[" + encoder + " " + decoder + "]");
     }
 
+    /**
+     * Combines a {@link MapEncoder} and a {@link MapDecoder} into a named {@link MapCodec}. The key stream
+     * of the returned codec is the concatenation of the key stream of the encoder and decoder.
+     *
+     * @param encoder The {@link MapEncoder} defining the returned {@link MapCodec}.
+     * @param decoder The {@link MapDecoder} defining the returned {@link MapCodec}.
+     * @param name    The name given in the string representation of the returned {@link MapCodec}.
+     * @param <A>     The type the returned codec operates on.
+     * @return A {@link MapCodec} combining the given encoder and decoder.
+     * @see #of(MapEncoder, MapDecoder)
+     */
     static <A> MapCodec<A> of(final MapEncoder<A> encoder, final MapDecoder<A> decoder, final String name) {
         return new MapCodec<A>() {
             @Override
@@ -111,62 +182,228 @@ public interface Codec<A> extends Encoder<A>, Decoder<A> {
         };
     }
 
+    /**
+     * Creates a codec for a {@link Pair} from codecs for its elements.
+     *
+     * @param first  A codec for the first element type.
+     * @param second A codec for the second element type.
+     * @param <F>    The first element type.
+     * @param <S>    The second element type.
+     * @return A codec for a {@link Pair} of the element types.
+     */
     static <F, S> Codec<Pair<F, S>> pair(final Codec<F> first, final Codec<S> second) {
         return new PairCodec<>(first, second);
     }
 
+    /**
+     * Creates a codec for an {@link Either} from codecs for its elements.
+     *
+     * @param first  A codec for the first element type.
+     * @param second A codec for the second element type.
+     * @param <F>    The first element type.
+     * @param <S>    The second element type.
+     * @return A codec for an {@link Either} of the element types.
+     */
     static <F, S> Codec<Either<F, S>> either(final Codec<F> first, final Codec<S> second) {
         return new EitherCodec<>(first, second);
     }
 
+    /**
+     * Creates a map codec for a {@link Pair} from map codecs for its elements.
+     *
+     * @param first  A codec for the first element type.
+     * @param second A codec for the second element type.
+     * @param <F>    The first element type.
+     * @param <S>    The second element type.
+     * @return A codec for a {@link Pair} of the element types.
+     */
     static <F, S> MapCodec<Pair<F, S>> mapPair(final MapCodec<F> first, final MapCodec<S> second) {
         return new PairMapCodec<>(first, second);
     }
 
+    /**
+     * Creates a map codec for an {@link Either} from map codecs for its elements.
+     *
+     * @param first  A codec for the first element type.
+     * @param second A codec for the second element type.
+     * @param <F>    The first element type.
+     * @param <S>    The second element type.
+     * @return A codec for an {@link Either} of the element types.
+     */
     static <F, S> MapCodec<Either<F, S>> mapEither(final MapCodec<F> first, final MapCodec<S> second) {
         return new EitherMapCodec<>(first, second);
     }
 
+    /**
+     * Creates a codec for a {@link List} from a codec for the element type.
+     *
+     * @param elementCodec A codec for the element type of the list.
+     * @param <E>          The element type of the list.
+     * @return A codec for a {@link List} of the element type.
+     * @see #listOf()
+     */
     static <E> Codec<List<E>> list(final Codec<E> elementCodec) {
         return new ListCodec<>(elementCodec);
     }
 
+    /**
+     * Creates a codec for a list of key-value pairs from codecs for the element types.
+     *
+     * @param keyCodec     A codec for the key type.
+     * @param elementCodec A codec for the element type.
+     * @param <K>          The key type.
+     * @param <V>          The element type.
+     * @return A codec for a list of key-value pairs.
+     * @implNote This implementation is likely more efficient than calling {@link #pair(Codec, Codec)} and
+     * {@link #list(Codec)} in sequence.
+     * @see #pair(Codec, Codec)
+     * @see #list(Codec)
+     */
     static <K, V> Codec<List<Pair<K, V>>> compoundList(final Codec<K> keyCodec, final Codec<V> elementCodec) {
         return new CompoundListCodec<>(keyCodec, elementCodec);
     }
 
+    /**
+     * Creates a map codec for a {@link java.util.Map} with a fixed key set.
+     *
+     * <p>For creating a map codec with an unbounded key set, see {@link #unboundedMap(Codec, Codec)}.
+     *
+     * @param keyCodec     A codec for the key type.
+     * @param elementCodec A codec for the element type.
+     * @param keys         A {@link Keyable} defining the set of allowed keys.
+     * @param <K>          The key type.
+     * @param <V>          The element type.
+     * @return A {@link MapCodec} for a map with fixed keys.
+     */
     static <K, V> SimpleMapCodec<K, V> simpleMap(final Codec<K> keyCodec, final Codec<V> elementCodec, final Keyable keys) {
         return new SimpleMapCodec<>(keyCodec, elementCodec, keys);
     }
 
+    /**
+     * Creates a map codec for a {@link java.util.Map} with arbitrary keys.
+     *
+     * <p>For creating a map codec with a fixed key set, see {@link #simpleMap(Codec, Codec, Keyable)}.
+     *
+     * @param keyCodec     A codec for the key type.
+     * @param elementCodec A codec for the element type.
+     * @param <K>          The key type.
+     * @param <V>          The element type.
+     * @return A {@link MapCodec} for a map with arbitrary keys.
+     */
     static <K, V> UnboundedMapCodec<K, V> unboundedMap(final Codec<K> keyCodec, final Codec<V> elementCodec) {
         return new UnboundedMapCodec<>(keyCodec, elementCodec);
     }
 
+    /**
+     * Creates a {@link MapCodec} that encodes and decodes an optional record field. Absent {@link Optional} values
+     * will not be serialized and visa-versa.
+     *
+     * @param name         The name of the field.
+     * @param elementCodec A codec for the element type.
+     * @param <F>          The element type.
+     * @return A map codec for the optional field {@code name}.
+     * @see #optionalFieldOf(String)
+     * @see #fieldOf(String)
+     */
     static <F> MapCodec<Optional<F>> optionalField(final String name, final Codec<F> elementCodec) {
         return new OptionalFieldCodec<>(name, elementCodec);
     }
 
+    /**
+     * Returns a codec for a {@link List} of elements defined by this codec.
+     *
+     * @implSpec The default implementation returns {@code list(this)}.
+     */
     default Codec<List<A>> listOf() {
         return list(this);
     }
 
+    /**
+     * Transforms this codec into another codec using the given invertible mapping functions.
+     *
+     * <p>This method performs a {@code map} operation on both {@link Decoder} and {@link Encoder}.
+     *
+     * @param to   A function from this codec's type to the new type.
+     * @param from A function from the new type to this codec's type.
+     * @param <S>  The new type.
+     * @return A codec for the new type.
+     * @implSpec The default implementation calls {@link #comap(Function)} and {@link #map(Function)} on this codec.
+     * @see #map(Function)
+     * @see #comap(Function)
+     */
     default <S> Codec<S> xmap(final Function<? super A, ? extends S> to, final Function<? super S, ? extends A> from) {
         return Codec.of(comap(from), map(to), toString() + "[xmapped]");
     }
 
+    /**
+     * Transforms this codec into another codec using the given invertible partial function.
+     *
+     * <p>This method performs a {@code flatMap} operation on {@link Decoder} and a {@code map} operation on {@link Encoder}.
+     *
+     * @param to   A partial function form this codec's type to the new type. The value and any errors are wrapped in
+     *             a {@link DataResult}.
+     * @param from A function from the new type to this codec's type.
+     * @param <S>  The new type.
+     * @return A codec for the new type.
+     * @implSpec The default implementation calls {@link #comap(Function)} and {@link #flatMap(Function)}.
+     * @see #flatMap(Function)
+     * @see #comap(Function)
+     */
     default <S> Codec<S> comapFlatMap(final Function<? super A, ? extends DataResult<? extends S>> to, final Function<? super S, ? extends A> from) {
         return Codec.of(comap(from), flatMap(to), toString() + "[comapFlatMapped]");
     }
 
+    /**
+     * Transforms this codec into another codec using the given partially invertible function.
+     *
+     * <p>This method performs a {@code map} operation on {@link Decoder} and a {@code flatMap} operation on {@link Encoder}.
+     *
+     * @param to   A function form this codec's type to the new type.
+     * @param from A partial function from the new type to this codec's type. The value and any errors are wrapped in
+     *             a {@link DataResult}.
+     * @param <S>  The new type.
+     * @return A codec for the new type.
+     * @implSpec The default implementation calls {@link #flatComap(Function)} and {@link #map(Function)}.
+     * @see #map(Function)
+     * @see #flatComap(Function)
+     */
     default <S> Codec<S> flatComapMap(final Function<? super A, ? extends S> to, final Function<? super S, ? extends DataResult<? extends A>> from) {
         return Codec.of(flatComap(from), map(to), toString() + "[flatComapMapped]");
     }
 
+    /**
+     * Transforms this codec into another codec using the given partially invertible partial function.
+     *
+     * <p>This method performs a {@code flatMap} operation on both {@link Decoder} and {@link Encoder}.
+     *
+     * @param to   A partial function form this codec's type to the new type.The value and any errors are wrapped in
+     *             a {@link DataResult}.
+     * @param from A partial function from the new type to this codec's type. The value and any errors are wrapped in
+     *             a {@link DataResult}.
+     * @param <S>  The new type.
+     * @return A codec for the new type.
+     * @implSpec The default implementation calls {@link #flatComap(Function)} and {@link #flatMap(Function)}.
+     * @see #flatMap(Function)
+     * @see #flatComap(Function)
+     */
     default <S> Codec<S> flatXmap(final Function<? super A, ? extends DataResult<? extends S>> to, final Function<? super S, ? extends DataResult<? extends A>> from) {
         return Codec.of(flatComap(from), flatMap(to), toString() + "[flatXmapped]");
     }
 
+    /**
+     * Returns a {@link MapCodec} that encodes and decodes objects in a record under a field with the given name.
+     * The returned {@link MapCodec} may be used to serialize and deserialize many different fields, all using
+     * different codecs, from a single record.
+     *
+     * @param name The field to encode and decode objects from.
+     * @return A {@link MapCodec} that performs the same operations as this codec, but takes the serialized value
+     * from a record under the given field.
+     * @implSpec The default implementation calls the superinterface default implementations
+     * {@link Encoder#fieldOf(String)} and {@link Decoder#fieldOf(String)} and combines them into a {@link MapCodec}.
+     * @see com.mojang.serialization.codecs.RecordCodecBuilder
+     * @see MapLike
+     * @see MapCodec#of(MapEncoder, MapDecoder)
+     */
     @Override
     default MapCodec<A> fieldOf(final String name) {
         return MapCodec.of(
@@ -176,10 +413,32 @@ public interface Codec<A> extends Encoder<A>, Decoder<A> {
         );
     }
 
+    /**
+     * Returns a {@link MapCodec} that encodes and decodes objects the may optionally appear in a record. Absent
+     * {@link Optional} values will not be serialized to the record, and visa-versa.
+     *
+     * @param name The field to encode and decode objects from.
+     * @return A {@link MapCodec} that performs the same operations as this codec, but taking the optional value
+     * from a record field.
+     * @implSpec The default implementation returns {@code optionalField(name, this)}.
+     * @see #optionalField(String, Codec)
+     * @see #fieldOf(String)
+     * @see #optionalFieldOf(String, Object)
+     */
     default MapCodec<Optional<A>> optionalFieldOf(final String name) {
         return optionalField(name, this);
     }
 
+    /**
+     * Returns a {@link MapCodec} that encodes and decodes objects that may optionally appear in a record. Absent
+     * values will be decoded as the default value, and the default value will be encoded as absent.
+     *
+     * @param name         The field to encode and decode objects from.
+     * @param defaultValue The default value to use if the value is absent in the serialized form.
+     * @return A {@link MapCodec} that performs operations on an optional record field.
+     * @implSpec The default implementation calls {@link #optionalField(String, Codec)}, then maps absent optionals
+     * to the default value.
+     */
     default MapCodec<A> optionalFieldOf(final String name, final A defaultValue) {
         return optionalField(name, this).xmap(
             o -> o.orElse(defaultValue),
@@ -187,10 +446,37 @@ public interface Codec<A> extends Encoder<A>, Decoder<A> {
         );
     }
 
+    /**
+     * Returns a {@link MapCodec} that encodes and decodes objects that may optionally appear in a record, and
+     * additionally allows the caller to provide a lifecycle for the default value. Absent values will be decoded
+     * as the default value, and the default value will be encoded as absent.
+     *
+     * @param name               The field to encode and decode objects from.
+     * @param defaultValue       The default value to use if the value is absent in the serialized form.
+     * @param lifecycleOfDefault The lifecycle of the default value.
+     * @return A {@link MapCodec} that performs operations on an optional record field.
+     * @implSpec The default implementation calls {@link #optionalFieldOf(String, Lifecycle, Object, Lifecycle)}
+     * with a field lifecycle of {@link Lifecycle#experimental()}.
+     * @see #optionalFieldOf(String, Object)
+     */
     default MapCodec<A> optionalFieldOf(final String name, final A defaultValue, final Lifecycle lifecycleOfDefault) {
         return optionalFieldOf(name, Lifecycle.experimental(), defaultValue, lifecycleOfDefault);
     }
 
+    /**
+     * Returns a {@link MapCodec} that encodes and decodes objects that may optionally appear in a record, and
+     * additionally allows the caller to provide lifecycles for the present field values and the default value.
+     * Absent values will be decoded as the default value, and the default value will be encoded as absent.
+     *
+     * @param name               The field to encode and decode objects from.
+     * @param defaultValue       The default value to use if the value is absent in the serialized form.
+     * @param fieldLifecycle     The lifecycle of the encoded or decoded fields.
+     * @param lifecycleOfDefault The lifecycle of the default value.
+     * @return A {@link MapCodec} that performs operations on an optional record field.
+     * @implSpec The default implementation calls {@link #optionalField(String, Codec)}, then maps absent optionals
+     * to the default value.
+     * @see #optionalFieldOf(String, Object)
+     */
     default MapCodec<A> optionalFieldOf(final String name, final Lifecycle fieldLifecycle, final A defaultValue, final Lifecycle lifecycleOfDefault) {
         // setting lifecycle to stable on the outside since it will be overriden by the passed parameters
         return optionalField(name, this).stable().flatXmap(
@@ -199,12 +485,48 @@ public interface Codec<A> extends Encoder<A>, Decoder<A> {
         );
     }
 
+    /**
+     * A unary operator applied on the result obtained from decoding or encoding. This can be used to directly
+     * transform the {@link DataResult} returned from decoding and encoding methods, rather than the wrapped
+     * result.
+     *
+     * @param <A> The type this operator transforms.
+     */
     interface ResultFunction<A> {
+        /**
+         * Applies a transformation to the result of decoding an object {@code a}. This transformation may read
+         * more input from the serialized form, or transform successes into errors and visa-versa.
+         *
+         * @param ops   The {@link DynamicOps} instance defining the serialized form.
+         * @param input The original input to {@link Decoder#decode(Dynamic)}.
+         * @param a     The result obtained from {@link Decoder#decode(Dynamic)}.
+         * @param <T>   The type of the serialized form.
+         * @return The transformed {@link DataResult}.
+         */
         <T> DataResult<Pair<A, T>> apply(final DynamicOps<T> ops, final T input, final DataResult<Pair<A, T>> a);
 
+        /**
+         * Applies a transformation to the result of encoding an object. This transformation may serialize additional
+         * data from the input object, or transform successes into errors and visa-versa.
+         *
+         * @param ops   The {@link DynamicOps} instance defining the serialized form.
+         * @param input The original input to {@link Encoder#encode(Object, DynamicOps, Object)}.
+         * @param t     the result obtained from {@link Encoder#encode(Object, DynamicOps, Object)}.
+         * @param <T>   The type of the serialized form.
+         * @return The transformed {@link DataResult}.
+         */
         <T> DataResult<T> coApply(final DynamicOps<T> ops, final A input, final DataResult<T> t);
     }
 
+    /**
+     * Transforms the {@link DataResult} produced by this code's decode and encode methods.
+     *
+     * @param function The function to run on the produced {@link DataResult}.
+     * @return A codec that runs the given function after decoding or encoding.
+     * @implSpec The default implementation returns a new codec that wraps this codec.
+     * @see #decode(DynamicOps, Object)
+     * @see #encode(Object, DynamicOps, Object)
+     */
     default Codec<A> mapResult(final ResultFunction<A> function) {
         return new Codec<A>() {
             @Override
@@ -224,10 +546,30 @@ public interface Codec<A> extends Encoder<A>, Decoder<A> {
         };
     }
 
+    /**
+     * Provides a default value for decoding in case of error, and runs the given callback on error.
+     *
+     * @param onError The callback to run if decoding or encoding fails.
+     * @param value   The default value to return if decoding fails.
+     * @return A codec that implements the error handling behavior.
+     * @implSpec The default implementation calls {@link #withDefault(UnaryOperator, Object)}, passing an error
+     * function that returns its input after calling {@code onError}.
+     * @see #withDefault(Object)
+     */
     default Codec<A> withDefault(final Consumer<String> onError, final A value) {
         return withDefault(DataFixUtils.consumerToFunction(onError), value);
     }
 
+    /**
+     * Provides a default value for decoding in case of error, and transforms the error.
+     *
+     * @param onError A function that transforms an error if one is returned.
+     * @param value   The default value to return if decoding fails.
+     * @return A codec that implements the error handling behavior.
+     * @implSpec The default implementation calls {@link #mapResult(ResultFunction)} with a {@link ResultFunction}
+     * that maps the results and applies the error function.
+     * @see ResultFunction
+     */
     default Codec<A> withDefault(final UnaryOperator<String> onError, final A value) {
         return mapResult(new ResultFunction<A>() {
             @Override
@@ -247,10 +589,29 @@ public interface Codec<A> extends Encoder<A>, Decoder<A> {
         });
     }
 
+    /**
+     * Provides a default value for decoding in case of error, and runs the given callback on error.
+     *
+     * @param onError The callback to run if decoding or encoding fails.
+     * @param value   A supplier of default values to return if decoding fails.
+     * @return A codec that implements the error handling behavior.
+     * @implSpec The default implementation calls {@link #withDefault(UnaryOperator, Supplier)}, passing an error
+     * function that returns its input after calling {@code onError}.
+     */
     default Codec<A> withDefault(final Consumer<String> onError, final Supplier<? extends A> value) {
         return withDefault(DataFixUtils.consumerToFunction(onError), value);
     }
 
+    /**
+     * Provides a default value for decoding in case of error, and transforms the error.
+     *
+     * @param onError A function that transforms an error if one is returned.
+     * @param value   A supplier of default values to return if decoding fails.
+     * @return A codec that implements the error handling behavior.
+     * @implSpec The default implementation calls {@link #mapResult(ResultFunction)} with a {@link ResultFunction}
+     * that maps the results and applies the error function.
+     * @see ResultFunction
+     */
     default Codec<A> withDefault(final UnaryOperator<String> onError, final Supplier<? extends A> value) {
         return mapResult(new ResultFunction<A>() {
             @Override
@@ -270,6 +631,14 @@ public interface Codec<A> extends Encoder<A>, Decoder<A> {
         });
     }
 
+    /**
+     * Provides a default value for decoding in case of error.
+     *
+     * @param value The default value to return if decoding fails.
+     * @return A codec that returns the default value if decoding fails.
+     * @implSpec The default implementation calls {@link #mapResult(ResultFunction)} with a {@link ResultFunction}
+     * that supplies the default value if this codec cannot decode.
+     */
     default Codec<A> withDefault(final A value) {
         return mapResult(new ResultFunction<A>() {
             @Override
@@ -289,6 +658,14 @@ public interface Codec<A> extends Encoder<A>, Decoder<A> {
         });
     }
 
+    /**
+     * Provides a default value for decoding in case of error.
+     *
+     * @param value A supplier of default values to return if decoding fails.
+     * @return A codec that returns the default value if decoding fails.
+     * @implSpec The default implementation calls {@link #mapResult(ResultFunction)} with a {@link ResultFunction}
+     * that supplies the default value if this codec cannot decode.
+     */
     default Codec<A> withDefault(final Supplier<? extends A> value) {
         return mapResult(new ResultFunction<A>() {
             @Override
@@ -313,72 +690,368 @@ public interface Codec<A> extends Encoder<A>, Decoder<A> {
         return Codec.of(this, Decoder.super.promotePartial(onError));
     }
 
+    /**
+     * Returns a codec that always decodes the given value and always encodes an empty value.
+     *
+     * @param defaultValue The value to decode.
+     * @param <A>          The type of the value.
+     * @return A codec that always decodes the given value.
+     */
     static <A> Codec<A> unit(final A defaultValue) {
         return unit(() -> defaultValue);
     }
 
+    /**
+     * Returns a codec that always decodes a supplied value and always encodes an empty value.
+     *
+     * @param defaultValue A supplier of the value to decode.
+     * @param <A>          The type of the value.
+     * @return A codec that always decodes the given value.
+     */
     static <A> Codec<A> unit(final Supplier<A> defaultValue) {
         return MapCodec.unit(defaultValue).codec();
     }
 
+    /**
+     * Returns a {@link Codec} that uses a default type key extracted using this codec to polymorphically dispatch
+     * against a complete set of supported subtypes. This method can be used to implement encoding and decoding over
+     * algebraic types or sealed class hierarchies which may require different codecs for each subtype.
+     *
+     * <p>This method is equivalent to {@code dispatch("type", type, codec)}.
+     *
+     * <p><strong>Warning: This method is unsound. Care must be taken that the codecs returned by
+     * {@code codec} actually accept the correct subtype, and not an incidental subtype thereof. Heap pollution
+     * may occur when using this method unless the programmer checks that the correct types are inferred or
+     * specified.</strong>
+     *
+     * @param type  A function that extracts the type key from the a polymorphic value.
+     * @param codec A function that produces a codec for a subtype corresponding to the provided type key.
+     * @param <E>   The polymorphic object type.
+     * @return A codec that operates on the polymorphic object type.
+     * @implSpec The default implementation calls {@link #dispatch(String, Function, Function)}
+     * with the type key {@code "type"}.
+     * @see #dispatchStable(Function, Function)
+     */
     default <E> Codec<E> dispatch(final Function<? super E, ? extends A> type, final Function<? super A, ? extends Codec<? extends E>> codec) {
         return dispatch("type", type, codec);
     }
 
+    /**
+     * Returns a {@link Codec} that uses a type key extracted using this codec to polymorphically dispatch against a
+     * complete set of supported subtypes. This method can be used to implement encoding and decoding over
+     * algebraic types or sealed class hierarchies which may require different codecs for each subtype.
+     *
+     * <p><strong>Warning: This method is unsound. Care must be taken that the codecs returned by
+     * {@code codec} actually accept the correct subtype, and not an incidental subtype thereof. Heap pollution
+     * may occur when using this method unless the programmer checks that the correct types are inferred or
+     * specified.</strong>
+     *
+     * @param typeKey The field in the record that the serialized type key is stored under.
+     * @param type    A partial function that extracts the type key from the a polymorphic value.
+     * @param codec   A function that produces a codec for a subtype corresponding to the provided type key.
+     * @param <E>     The polymorphic object type.
+     * @return A codec that operates on the polymorphic object type.
+     * @implSpec The default implementation calls {@link #partialDispatch(String, Function, Function)}, with
+     * the type and codec functions always returning a success.
+     * @see #dispatch(Function, Function)
+     */
     default <E> Codec<E> dispatch(final String typeKey, final Function<? super E, ? extends A> type, final Function<? super A, ? extends Codec<? extends E>> codec) {
         return partialDispatch(typeKey, type.andThen(DataResult::success), codec.andThen(DataResult::success));
     }
 
+    /**
+     * Returns a {@link Codec} that uses a default type key extracted using this codec to polymorphically dispatch
+     * against a complete set of supported subtypes. This method can be used to implement encoding and decoding over
+     * algebraic types or sealed class hierarchies which may require different codecs for each subtype.
+     *
+     * <p>This method is equivalent to {@code dispatchStable("type", type, codec)}.
+     *
+     * <p><strong>Warning: This method is unsound. Care must be taken that the codecs returned by
+     * {@code codec} actually accept the correct subtype, and not an incidental subtype thereof. Heap pollution
+     * may occur when using this method unless the programmer checks that the correct types are inferred or
+     * specified.</strong>
+     *
+     * @param type  A function that extracts the type key from the a polymorphic value.
+     * @param codec A function that produces a codec for a subtype corresponding to the provided type key.
+     * @param <E>   The polymorphic object type.
+     * @return A codec that operates on the polymorphic object type.
+     * @implSpec The default implementation calls {@link #dispatchStable(String, Function, Function)}
+     * with the type key {@code "type"}.
+     * @see #dispatchStable(Function, Function)
+     */
     default <E> Codec<E> dispatchStable(final Function<? super E, ? extends A> type, final Function<? super A, ? extends Codec<? extends E>> codec) {
         return dispatchStable("type", type, codec);
     }
 
+    /**
+     * Returns a {@link Codec} that uses a type key extracted using this codec to polymorphically dispatch against a
+     * complete set of supported subtypes. This method can be used to implement encoding and decoding over
+     * algebraic types or sealed class hierarchies which may require different codecs for each subtype.
+     *
+     * <p>This method is exactly like {@link #dispatch(String, Function, Function)}, except that this method
+     * produces results with the stable lifecycle.
+     *
+     * <p><strong>Warning: This method is unsound. Care must be taken that the codecs returned by
+     * {@code codec} actually accept the correct subtype, and not an incidental subtype thereof. Heap pollution
+     * may occur when using this method unless the programmer checks that the correct types are inferred or
+     * specified.</strong>
+     *
+     * @param typeKey The field in the record that the serialized type key is stored under.
+     * @param type    A function that extracts the type key from the a polymorphic value.
+     * @param codec   A function that produces a codec for a subtype corresponding to the provided type key.
+     * @param <E>     The polymorphic object type.
+     * @return A codec that operates on the polymorphic object type.
+     * @implSpec The default implementation calls {@link #partialDispatch(String, Function, Function)} with the
+     * type and codec functions always returning a success.
+     */
     default <E> Codec<E> dispatchStable(final String typeKey, final Function<? super E, ? extends A> type, final Function<? super A, ? extends Codec<? extends E>> codec) {
         return partialDispatch(typeKey, e -> DataResult.success(type.apply(e), Lifecycle.stable()), a -> DataResult.success(codec.apply(a), Lifecycle.stable()));
     }
 
+    /**
+     * Returns a {@link Codec} that uses a default type key extracted using this codec to polymorphically dispatch
+     * against a complete set of supported subtypes. This method can be used to implement encoding and decoding over
+     * algebraic types or sealed class hierarchies which may require different codecs for each subtype.
+     *
+     * <p>This method is equivalent to {@code dispatchDeprecated(since, "type", type, codec)}.
+     *
+     * <p><strong>Warning: This method is unsound. Care must be taken that the codecs returned by
+     * {@code codec} actually accept the correct subtype, and not an incidental subtype thereof. Heap pollution
+     * may occur when using this method unless the programmer checks that the correct types are inferred or
+     * specified.</strong>
+     *
+     * @param type  A function that extracts the type key from the a polymorphic value.
+     * @param codec A function that produces a codec for a subtype corresponding to the provided type key.
+     * @param <E>   The polymorphic object type.
+     * @return A codec that operates on the polymorphic object type.
+     * @implSpec The default implementation calls {@link #dispatchDeprecated(int, String, Function, Function)}
+     * with the type key {@code "type"}.
+     */
     default <E> Codec<E> dispatchDeprecated(final int since, final Function<? super E, ? extends A> type, final Function<? super A, ? extends Codec<? extends E>> codec) {
         return dispatchDeprecated(since, "type", type, codec);
     }
 
+    /**
+     * Returns a {@link Codec} that uses a type key extracted using this codec to polymorphically dispatch against a
+     * complete set of supported subtypes. This method can be used to implement encoding and decoding over
+     * algebraic types or sealed class hierarchies which may require different codecs for each subtype.
+     *
+     * <p>This method is exactly like {@link #dispatch(String, Function, Function)}, except that this method
+     * produces results with the deprecated lifecycle.
+     *
+     * <p><strong>Warning: This method is unsound. Care must be taken that the codecs returned by
+     * {@code codec} actually accept the correct subtype, and not an incidental subtype thereof. Heap pollution
+     * may occur when using this method unless the programmer checks that the correct types are inferred or
+     * specified.</strong>
+     *
+     * @param typeKey The field in the record that the serialized type key is stored under.
+     * @param type    A function that extracts the type key from the a polymorphic value.
+     * @param codec   A function that produces a codec for a subtype corresponding to the provided type key.
+     * @param <E>     The polymorphic object type.
+     * @return A codec that operates on the polymorphic object type.
+     * @implSpec The default implementation calls {@link #partialDispatch(String, Function, Function)} with the
+     * type and codec functions always returning a success.
+     */
     default <E> Codec<E> dispatchDeprecated(final int since, final String typeKey, final Function<? super E, ? extends A> type, final Function<? super A, ? extends Codec<? extends E>> codec) {
         final Lifecycle deprecated = Lifecycle.deprecated(since);
         return partialDispatch(typeKey, e -> DataResult.success(type.apply(e), deprecated), a -> DataResult.success(codec.apply(a), deprecated));
     }
 
+    /**
+     * Returns a {@link Codec} that uses a type key extracted using this codec to polymorphically dispatch against a
+     * partial set of supported subtypes. This method can be used to implement partial encoding and decoding over
+     * algebraic types or sealed class hierarchies which may require different codecs for each subtype.
+     *
+     * <p><strong>Warning: This method is unsound. Care must be taken that the codecs returned by
+     * {@code codec} actually accept the correct subtype, and not an incidental subtype thereof. Heap pollution
+     * may occur when using this method unless the programmer checks that the correct types are inferred or
+     * specified.</strong>
+     *
+     * @param typeKey The field in the record that the serialized type key is stored under.
+     * @param type    A partial function that extracts the type key from the a polymorphic value.
+     * @param codec   A function that produces a codec for a subtype corresponding to the provided type key.
+     * @param <E>     The polymorphic object type.
+     * @return A codec that operates on the polymorphic object type.
+     * @implSpec The default implementation returns a codec generated from a {@link KeyDispatchCodec}.
+     * @see #dispatch(String, Function, Function)
+     */
     default <E> Codec<E> partialDispatch(final String typeKey, final Function<? super E, ? extends DataResult<? extends A>> type, final Function<? super A, ? extends DataResult<? extends Codec<? extends E>>> codec) {
         return new KeyDispatchCodec<>(typeKey, this, type, codec).codec();
     }
 
+    /**
+     * Returns a {@link MapCodec} that uses a default type key extracted using this codec to polymorphically dispatch
+     * against a complete set of supported subtypes. This method can be used to implement encoding and decoding over
+     * algebraic types or sealed class hierarchies which may require different codecs for each subtype.
+     *
+     * <p>This method is equivalent to {@code dispatchMap("type", type, codec)}.
+     *
+     * <p><strong>Warning: This method is unsound. Care must be taken that the codecs returned by
+     * {@code codec} actually accept the correct subtype, and not an incidental subtype thereof. Heap pollution
+     * may occur when using this method unless the programmer checks that the correct types are inferred or
+     * specified.</strong>
+     *
+     * @param type  A function that extracts the type key from the a polymorphic value.
+     * @param codec A function that produces a codec for a subtype corresponding to the provided type key.
+     * @param <E>   The polymorphic object type.
+     * @return A codec that operates on the polymorphic object type.
+     * @implSpec The default implementation calls {@link #dispatchStableMap(String, Function, Function)}
+     * with the type key {@code "type"}.
+     * @see #dispatchStable(Function, Function)
+     */
     default <E> MapCodec<E> dispatchMap(final Function<? super E, ? extends A> type, final Function<? super A, ? extends Codec<? extends E>> codec) {
         return dispatchMap("type", type, codec);
     }
 
+    /**
+     * Returns a {@link MapCodec} that uses a type key extracted using this codec to polymorphically dispatch against a
+     * complete set of supported subtypes. This method can be used to implement encoding and decoding over
+     * algebraic types or sealed class hierarchies which may require different codecs for each subtype.
+     *
+     * <p><strong>Warning: This method is unsound. Care must be taken that the codecs returned by
+     * {@code codec} actually accept the correct subtype, and not an incidental subtype thereof. Heap pollution
+     * may occur when using this method unless the programmer checks that the correct types are inferred or
+     * specified.</strong>
+     *
+     * @param typeKey The field in the record that the serialized type key is stored under.
+     * @param type    A function that extracts the type key from the a polymorphic value.
+     * @param codec   A function that produces a codec for a subtype corresponding to the provided type key.
+     * @param <E>     The polymorphic object type.
+     * @return A codec that operates on the polymorphic object type.
+     * @implSpec The default implementation calls {@link #partialDispatchMap(String, Function, Function)} with the
+     * type and codec functions always returning a success.
+     * @see #dispatchStable(String, Function, Function)
+     */
     default <E> MapCodec<E> dispatchMap(final String typeKey, final Function<? super E, ? extends A> type, final Function<? super A, ? extends Codec<? extends E>> codec) {
         return partialDispatchMap(typeKey, type.andThen(DataResult::success), codec.andThen(DataResult::success));
     }
 
+    /**
+     * Returns a {@link MapCodec} that uses a default type key extracted using this codec to polymorphically dispatch
+     * against a complete set of supported subtypes. This method can be used to implement encoding and decoding over
+     * algebraic types or sealed class hierarchies which may require different codecs for each subtype.
+     *
+     * <p>This method is equivalent to {@code dispatchStableMap("type", type, codec)}.
+     *
+     * <p><strong>Warning: This method is unsound. Care must be taken that the codecs returned by
+     * {@code codec} actually accept the correct subtype, and not an incidental subtype thereof. Heap pollution
+     * may occur when using this method unless the programmer checks that the correct types are inferred or
+     * specified.</strong>
+     *
+     * @param type  A function that extracts the type key from the a polymorphic value.
+     * @param codec A function that produces a codec for a subtype corresponding to the provided type key.
+     * @param <E>   The polymorphic object type.
+     * @return A codec that operates on the polymorphic object type.
+     * @implSpec The default implementation calls {@link #dispatchStableMap(String, Function, Function)}
+     * with the type key {@code "type"}.
+     * @see #dispatchStable(Function, Function)
+     */
     default <E> MapCodec<E> dispatchStableMap(final Function<? super E, ? extends A> type, final Function<? super A, ? extends Codec<? extends E>> codec) {
         return dispatchStableMap("type", type, codec);
     }
 
+    /**
+     * Returns a {@link MapCodec} that uses a type key extracted using this codec to polymorphically dispatch against a
+     * complete set of supported subtypes. This method can be used to implement encoding and decoding over
+     * algebraic types or sealed class hierarchies which may require different codecs for each subtype.
+     *
+     * <p>This method is exactly like {@link #dispatchMap(String, Function, Function)}, except that this method
+     * produces results with the stable lifecycle.
+     *
+     * <p><strong>Warning: This method is unsound. Care must be taken that the codecs returned by
+     * {@code codec} actually accept the correct subtype, and not an incidental subtype thereof. Heap pollution
+     * may occur when using this method unless the programmer checks that the correct types are inferred or
+     * specified.</strong>
+     *
+     * @param typeKey The field in the record that the serialized type key is stored under.
+     * @param type    A function that extracts the type key from the a polymorphic value.
+     * @param codec   A function that produces a codec for a subtype corresponding to the provided type key.
+     * @param <E>     The polymorphic object type.
+     * @return A codec that operates on the polymorphic object type.
+     * @implSpec The default implementation calls {@link #partialDispatchMap(String, Function, Function)} with the
+     * type and codec functions always returning a success.
+     * @see #dispatchStable(String, Function, Function)
+     */
     default <E> MapCodec<E> dispatchStableMap(final String typeKey, final Function<? super E, ? extends A> type, final Function<? super A, ? extends Codec<? extends E>> codec) {
         return partialDispatchMap(typeKey, e -> DataResult.success(type.apply(e), Lifecycle.stable()), a -> DataResult.success(codec.apply(a), Lifecycle.stable()));
     }
 
+    /**
+     * Returns a {@link MapCodec} that uses a default type key extracted using this codec to polymorphically dispatch
+     * against a complete set of supported subtypes. This method can be used to implement encoding and decoding over
+     * algebraic types or sealed class hierarchies which may require different codecs for each subtype.
+     *
+     * <p>This method is equivalent to {@code dispatchDeprecatedMap(since, "type", type, codec)}.
+     *
+     * <p><strong>Warning: This method is unsound. Care must be taken that the codecs returned by
+     * {@code codec} actually accept the correct subtype, and not an incidental subtype thereof. Heap pollution
+     * may occur when using this method unless the programmer checks that the correct types are inferred or
+     * specified.</strong>
+     *
+     * @param type  A function that extracts the type key from the a polymorphic value.
+     * @param codec A function that produces a codec for a subtype corresponding to the provided type key.
+     * @param <E>   The polymorphic object type.
+     * @return A codec that operates on the polymorphic object type.
+     * @implSpec The default implementation calls {@link #dispatchDeprecatedMap(int, String, Function, Function)}
+     * with the type key {@code "type"}.
+     * @see #dispatchDeprecated(int, Function, Function)
+     */
     default <E> MapCodec<E> dispatchDeprecatedMap(final int since, final Function<? super E, ? extends A> type, final Function<? super A, ? extends Codec<? extends E>> codec) {
         return dispatchDeprecatedMap(since, "type", type, codec);
     }
 
+    /**
+     * Returns a {@link MapCodec} that uses a type key extracted using this codec to polymorphically dispatch against a
+     * complete set of supported subtypes. This method can be used to implement encoding and decoding over
+     * algebraic types or sealed class hierarchies which may require different codecs for each subtype.
+     *
+     * <p>This method is exactly like {@link #dispatchMap(String, Function, Function)}, except that this method
+     * produces results with the deprecated lifecycle.
+     *
+     * <p><strong>Warning: This method is unsound. Care must be taken that the codecs returned by
+     * {@code codec} actually accept the correct subtype, and not an incidental subtype thereof. Heap pollution
+     * may occur when using this method unless the programmer checks that the correct types are inferred or
+     * specified.</strong>
+     *
+     * @param typeKey The field in the record that the serialized type key is stored under.
+     * @param type    A function that extracts the type key from the a polymorphic value.
+     * @param codec   A function that produces a codec for a subtype corresponding to the provided type key.
+     * @param <E>     The polymorphic object type.
+     * @return A codec that operates on the polymorphic object type.
+     * @implSpec The default implementation calls {@link #partialDispatchMap(String, Function, Function)} with the
+     * type and codec functions always returning a success.
+     * @see #dispatchDeprecated(int, String, Function, Function)
+     */
     default <E> MapCodec<E> dispatchDeprecatedMap(final int since, final String typeKey, final Function<? super E, ? extends A> type, final Function<? super A, ? extends Codec<? extends E>> codec) {
         final Lifecycle deprecated = Lifecycle.deprecated(since);
         return partialDispatchMap(typeKey, e -> DataResult.success(type.apply(e), deprecated), a -> DataResult.success(codec.apply(a), deprecated));
     }
 
+    /**
+     * Returns a {@link MapCodec} that uses a type key extracted using this codec to polymorphically dispatch against a
+     * partial set of supported subtypes. This method can be used to implement partial encoding and decoding over
+     * algebraic types or sealed class hierarchies.
+     *
+     * <p><strong>Warning: This method is unsound. Care must be taken that the codecs returned by
+     * {@code codec} actually accept the correct subtype, and not an incidental subtype thereof. Heap pollution
+     * may occur when using this method unless the programmer checks that the correct types are inferred or
+     * specified.</strong>
+     *
+     * @param typeKey The field in the record that the serialized type key is stored under.
+     * @param type    A partial function that extracts the type key from the a polymorphic value.
+     * @param codec   A function that produces a codec for a subtype corresponding to the provided type key.
+     * @param <E>     The polymorphic object type.
+     * @return A codec that operates on the polymorphic object type.
+     * @implSpec The default implementation returns a new {@link KeyDispatchCodec}.
+     * @see #partialDispatch(String, Function, Function)
+     */
     default <E> MapCodec<E> partialDispatchMap(final String typeKey, final Function<? super E, ? extends DataResult<? extends A>> type, final Function<? super A, ? extends DataResult<? extends Codec<? extends E>>> codec) {
         return new KeyDispatchCodec<>(typeKey, this, type, codec);
     }
 
+    /**
+     * A {@link PrimitiveCodec} for the type {@code boolean}.
+     */
     PrimitiveCodec<Boolean> BOOL = new PrimitiveCodec<Boolean>() {
         @Override
         public <T> DataResult<Boolean> read(final DynamicOps<T> ops, final T input) {
@@ -397,6 +1070,9 @@ public interface Codec<A> extends Encoder<A>, Decoder<A> {
         }
     };
 
+    /**
+     * A {@link PrimitiveCodec} for the type {@code byte}.
+     */
     PrimitiveCodec<Byte> BYTE = new PrimitiveCodec<Byte>() {
         @Override
         public <T> DataResult<Byte> read(final DynamicOps<T> ops, final T input) {
@@ -416,6 +1092,9 @@ public interface Codec<A> extends Encoder<A>, Decoder<A> {
         }
     };
 
+    /**
+     * A {@link PrimitiveCodec} for the type {@code short}.
+     */
     PrimitiveCodec<Short> SHORT = new PrimitiveCodec<Short>() {
         @Override
         public <T> DataResult<Short> read(final DynamicOps<T> ops, final T input) {
@@ -435,6 +1114,9 @@ public interface Codec<A> extends Encoder<A>, Decoder<A> {
         }
     };
 
+    /**
+     * A {@link PrimitiveCodec} for the type {@code int}.
+     */
     PrimitiveCodec<Integer> INT = new PrimitiveCodec<Integer>() {
         @Override
         public <T> DataResult<Integer> read(final DynamicOps<T> ops, final T input) {
@@ -454,6 +1136,9 @@ public interface Codec<A> extends Encoder<A>, Decoder<A> {
         }
     };
 
+    /**
+     * A {@link PrimitiveCodec} for the type {@code long}.
+     */
     PrimitiveCodec<Long> LONG = new PrimitiveCodec<Long>() {
         @Override
         public <T> DataResult<Long> read(final DynamicOps<T> ops, final T input) {
@@ -473,6 +1158,9 @@ public interface Codec<A> extends Encoder<A>, Decoder<A> {
         }
     };
 
+    /**
+     * A {@link PrimitiveCodec} for the type {@code float}.
+     */
     PrimitiveCodec<Float> FLOAT = new PrimitiveCodec<Float>() {
         @Override
         public <T> DataResult<Float> read(final DynamicOps<T> ops, final T input) {
@@ -492,6 +1180,9 @@ public interface Codec<A> extends Encoder<A>, Decoder<A> {
         }
     };
 
+    /**
+     * A {@link PrimitiveCodec} for the type {@code double}.
+     */
     PrimitiveCodec<Double> DOUBLE = new PrimitiveCodec<Double>() {
         @Override
         public <T> DataResult<Double> read(final DynamicOps<T> ops, final T input) {
@@ -511,6 +1202,9 @@ public interface Codec<A> extends Encoder<A>, Decoder<A> {
         }
     };
 
+    /**
+     * A {@link PrimitiveCodec} for the type {@link String}.
+     */
     PrimitiveCodec<String> STRING = new PrimitiveCodec<String>() {
         @Override
         public <T> DataResult<String> read(final DynamicOps<T> ops, final T input) {
@@ -529,6 +1223,9 @@ public interface Codec<A> extends Encoder<A>, Decoder<A> {
         }
     };
 
+    /**
+     * A {@link PrimitiveCodec} for the type {@link ByteBuffer} (a byte sequence).
+     */
     PrimitiveCodec<ByteBuffer> BYTE_BUFFER = new PrimitiveCodec<ByteBuffer>() {
         @Override
         public <T> DataResult<ByteBuffer> read(final DynamicOps<T> ops, final T input) {
@@ -547,6 +1244,9 @@ public interface Codec<A> extends Encoder<A>, Decoder<A> {
         }
     };
 
+    /**
+     * A {@link PrimitiveCodec} for the type {@link IntStream} (an int sequence).
+     */
     PrimitiveCodec<IntStream> INT_STREAM = new PrimitiveCodec<IntStream>() {
         @Override
         public <T> DataResult<IntStream> read(final DynamicOps<T> ops, final T input) {
@@ -565,6 +1265,9 @@ public interface Codec<A> extends Encoder<A>, Decoder<A> {
         }
     };
 
+    /**
+     * A {@link PrimitiveCodec} for the type {@link LongStream} (a long sequence).
+     */
     PrimitiveCodec<LongStream> LONG_STREAM = new PrimitiveCodec<LongStream>() {
         @Override
         public <T> DataResult<LongStream> read(final DynamicOps<T> ops, final T input) {
@@ -583,6 +1286,9 @@ public interface Codec<A> extends Encoder<A>, Decoder<A> {
         }
     };
 
+    /**
+     * A codec that "passes through" serialized forms unchanged.
+     */
     Codec<Dynamic<?>> PASSTHROUGH = new Codec<Dynamic<?>>() {
         @Override
         public <T> DataResult<Pair<Dynamic<?>, T>> decode(final DynamicOps<T> ops, final T input) {
@@ -617,5 +1323,8 @@ public interface Codec<A> extends Encoder<A>, Decoder<A> {
         }
     };
 
+    /**
+     * A {@link MapCodec} that performs no encoding nor decoding.
+     */
     MapCodec<Unit> EMPTY = MapCodec.of(Encoder.empty(), Decoder.unit(Unit.INSTANCE));
 }
