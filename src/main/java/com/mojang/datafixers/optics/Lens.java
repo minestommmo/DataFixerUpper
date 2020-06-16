@@ -19,6 +19,26 @@ import java.util.function.Function;
  * <p>The canonical example for using a lens is to extract and update a field of a {@code struct} type, using the
  * C meaning of {@code struct}.
  *
+ * <p>In order to be a <em>lawful lens</em>, the implementations of {@link #view(Object)} and {@link #update(Object, Object)}
+ * must satisfy certain requirements. Assume that the object types {@code S} and {@code T} are implicitly convertible
+ * between each other and that the field types {@code A} and {@code B} are similarly convertible. Then the following
+ * rules must hold ({@code ==} here represents logical equality and not reference equality).
+ *
+ * <ol>
+ *     <li>
+ *         {@code update(b2, update(b1, s)) == update(b2, s)} - Updating twice is equivalent to updating once
+ *     </li>
+ *     <li>
+ *         {@code view(update(b, s)) == b} - Viewing after an update yields the value used to update.
+ *     </li>
+ *     <li>
+ *         {@code update(view(s), s) == s} - Updating with a viewed value yields the original object.
+ *     </li>
+ * </ol>
+ *
+ * <p>Lenses that are not <em>lawful</em> are said to be either <em>neutral</em> or <em>chaotic</em>, depending on the
+ * degree to which the lens laws are broken.
+ *
  * @param <S> The input object type.
  * @param <T> The output object type.
  * @param <A> The input field type.
@@ -119,6 +139,8 @@ public interface Lens<S, T, A, B> extends App2<Lens.Mu<A, B>, S, T>, Optic<Carte
      *
      * @param s A value of the input object type.
      * @return The extracted value of the input field type.
+     * @implSpec The implementation must, in conjunction with {@link #update(Object, Object)}, satisfy the lens laws
+     * in order for this lens to be a <em>lawful lens</em>.
      */
     A view(final S s);
 
@@ -133,14 +155,16 @@ public interface Lens<S, T, A, B> extends App2<Lens.Mu<A, B>, S, T>, Optic<Carte
      * @param b A value of the output field type with which to update the output object.
      * @param s A value of the input object type to be converted to a value of the output object type.
      * @return A value of the output object type, with the output field updated with the given value.
+     * @implSpec The implementation must, in conjunction with {@link #view(Object)}, satisfy the lens laws in order
+     * for this lens to be a <em>lawful lens</em>.
      */
     T update(final B b, final S s);
 
     /**
      * Evaluates this lens to produce a function that, when given a transformation between field types, produces
-     * a transformation that {@linkplain #view(Object) extracts} a value from the input object, uses the given
-     * transformation to produce a new value of the output field type, and finally uses that value to
-     * {@linkplain #update(Object, Object) update} the corresponding field in the output object.
+     * a transformation between object types. The transformation {@linkplain #view(Object) extracts} a value from
+     * the input object, uses the given transformation to produce a new value of the output field type, and finally
+     * uses that value to {@linkplain #update(Object, Object) update} the corresponding field in the output object.
      *
      * @param proofBox The {@link Cartesian} type class instance for {@link Lens}.
      * @param <P>      The type of transformation.

@@ -19,6 +19,23 @@ import java.util.function.Function;
  * <p>The canonical example for using a prism is to extract and update a field of a tagged {@code union} type, using
  * the C meaning of {@code union}.
  *
+ * <p>In order to be a <em>lawful prism</em>, the implementations of {@link #match(Object)} and {@link #build(Object)}
+ * must satisfy certain requirements. Assume that the object types {@code S} and {@code T} are implicitly convertible
+ * between each other and that the field types {@code A} and {@code B} are similarly convertible. Then the following
+ * rules must hold ({@code ==} here represents logical equality and not reference equality).
+ *
+ * <ol>
+ *     <li>
+ *         {@code match(build(b)) == Right(b)} - Matching against a built value yields that value.
+ *     </li>
+ *     <li>
+ *         {@code build?(match(s)) == s} - If a field is matched, building with it yields the original object.
+ *     </li>
+ * </ol>
+ *
+ * <p>Prisms that are not <em>lawful</em> are said to be either <em>neutral</em> or <em>chaotic</em>, depending on the
+ * degree to which the prism laws are broken.
+ *
  * @param <S> The input object type.
  * @param <T> The output object type.
  * @param <A> The input field type.
@@ -61,6 +78,8 @@ public interface Prism<S, T, A, B> extends App2<Prism.Mu<A, B>, S, T>, Optic<Coc
      *
      * @param s A value of the input object type from which to attempt to extract the input field value.
      * @return Either the value of the input field, or a value of the output object type equivalent to the input.
+     * @implSpec The implementation must, in conjunction with {@link #build(Object)}, satisfy the prism laws in order
+     * for this prism to be a <em>lawful prism</em>.
      */
     Either<T, A> match(final S s);
 
@@ -72,13 +91,16 @@ public interface Prism<S, T, A, B> extends App2<Prism.Mu<A, B>, S, T>, Optic<Coc
      *
      * @param b The value to construct the output object from.
      * @return A value of the output object type that contains the output field.
+     * @implSpec The implementation must, in conjunction with {@link #match(Object)}, satisfy the prism laws in order
+     * for this prism to be a <em>lawful prism</em>.
      */
     T build(final B b);
 
     /**
      * Evaluates this prism to produce a function that, when given a transformation between field types, produces a
-     * transformation that {@linkplain #match(Object) matches} the input object against the input field, and either
-     * {@linkplain #build(Object) builds} an output object from the extracted value or returns the converted input.
+     * transformation between object types. The transformation {@linkplain #match(Object) matches} the input object
+     * against the input field, and either {@linkplain #build(Object) builds} an output object from the extracted
+     * value or returns the converted input.
      *
      * @param proof The {@link Cocartesian} type class instance for {@link Prism}.
      * @return A function that takes a transformation between field types and produces a transformation between
