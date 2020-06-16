@@ -16,11 +16,15 @@ import java.util.function.Function;
  * to extract a single value of the input field type {@code A} from the input object type {@code S} and
  * to combine the input {@code S} and the transformed field type {@code B} into the output object type {@code T}.
  *
- * @param <S> The input objec type.
+ * <p>The canonical example for using a lens is to extract and update a field of a {@code struct} type, using the
+ * C meaning of {@code struct}.
+ *
+ * @param <S> The input object type.
  * @param <T> The output object type.
  * @param <A> The input field type.
  * @param <B> The output field type.
  * @dfu.shape %.Type.[%0::%2,%1::%3]
+ * @see <a href="https://en.wikipedia.org/wiki/Record_(computer_science)">Record Types</a>
  */
 public interface Lens<S, T, A, B> extends App2<Lens.Mu<A, B>, S, T>, Optic<Cartesian.Mu, S, T, A, B> {
     /**
