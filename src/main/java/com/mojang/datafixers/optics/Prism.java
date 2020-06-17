@@ -102,7 +102,7 @@ public interface Prism<S, T, A, B> extends App2<Prism.Mu<A, B>, S, T>, Optic<Coc
      * against the input field, and either {@linkplain #build(Object) builds} an output object from the extracted
      * value or returns the converted input.
      *
-     * @param proof The {@link Cocartesian} type class instance for {@link Prism}.
+     * @param proof The {@link Cocartesian} type class instance for the transformation type.
      * @return A function that takes a transformation between field types and produces a transformation between
      * object types.
      * @see Prism.Instance

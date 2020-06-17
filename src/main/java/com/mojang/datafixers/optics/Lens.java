@@ -26,7 +26,7 @@ import java.util.function.Function;
  *
  * <ol>
  *     <li>
- *         {@code update(b2, update(b1, s)) == update(b2, s)} - Updating twice is equivalent to updating once
+ *         {@code update(b2, update(b1, s)) == update(b2, s)} - Updating twice is equivalent to updating once.
  *     </li>
  *     <li>
  *         {@code view(update(b, s)) == b} - Viewing after an update yields the value used to update.
@@ -166,7 +166,7 @@ public interface Lens<S, T, A, B> extends App2<Lens.Mu<A, B>, S, T>, Optic<Carte
      * the input object, uses the given transformation to produce a new value of the output field type, and finally
      * uses that value to {@linkplain #update(Object, Object) update} the corresponding field in the output object.
      *
-     * @param proofBox The {@link Cartesian} type class instance for {@link Lens}.
+     * @param proofBox The {@link Cartesian} type class instance for the transformation type.
      * @param <P>      The type of transformation.
      * @return A function that takes a transformation between field types and produces a transformation between
      * object types.
