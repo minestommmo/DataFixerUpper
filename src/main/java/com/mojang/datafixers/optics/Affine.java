@@ -85,7 +85,7 @@ public interface Affine<S, T, A, B> extends App2<Affine.Mu<A, B>, S, T>, Optic<A
      * @param s The input object.
      * @return Either the extracted field value, or a value of the output object equivalent to the input.
      * @implSpec The implementation must, in conjunction with {@link #set(Object, Object)}, satisfy the affine laws
-     * in order for this lens to be a <em>lawful affine</em>.
+     * in order for this affine to be a <em>lawful affine</em>.
      */
     Either<T, A> preview(final S s);
 
@@ -97,7 +97,7 @@ public interface Affine<S, T, A, B> extends App2<Affine.Mu<A, B>, S, T>, Optic<A
      * @param s A value of the input object type.
      * @return A value of the output object type that contains the output field.
      * @implSpec The implementation must, in conjunction with {@link #preview(Object)}, satisfy the affine laws
-     * in order for this lens to be a <em>lawful affine</em>.
+     * in order for this affine to be a <em>lawful affine</em>.
      */
     T set(final B b, final S s);
 
