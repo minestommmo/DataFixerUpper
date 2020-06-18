@@ -19,13 +19,14 @@ import java.util.stream.Collectors;
  *
  * @param <F> The type of the first value.
  * @param <S> The type of the second value.
+ * @dfu.shape "(%0%.,.%1)"
  */
 public class Pair<F, S> implements App<Pair.Mu<S>, F> {
     /**
      * The witness type for {@link Pair}. The represents the partially applied type constructor {@code Pair<_,S>}.
      *
      * @param <S> The type of the second value.
-     * @dfu.shape %.Mu.[%^1,%0]
+     * @dfu.shape "(%^1%.,.%0)"
      */
     public static final class Mu<S> implements K1 {}
 
@@ -150,12 +151,14 @@ public class Pair<F, S> implements App<Pair.Mu<S>, F> {
      * The {@link CartesianLike} type class instance for {@link Pair}.
      *
      * @param <S2> The type of the pair's second element.
+     * @dfu.shape "(_%.,.%0)"
      */
     public static final class Instance<S2> implements Traversable<Mu<S2>, Instance.Mu<S2>>, CartesianLike<Mu<S2>, S2, Instance.Mu<S2>> {
         /**
          * The witness type of {@link Instance}.
          *
          * @param <S2> The type of the pair's second element.
+         * @dfu.shape instance %^1
          */
         public static final class Mu<S2> implements Traversable.Mu, CartesianLike.Mu {}
 
