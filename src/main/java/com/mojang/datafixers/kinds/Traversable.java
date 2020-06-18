@@ -12,6 +12,12 @@ import java.util.function.Function;
  * from a function {@code A -> DataResult<B>}, only producing a successful result if all the original
  * elements were converted successfully.
  *
+ * <p>Note that the implementation of {@link #map(Function, App)} inherited from {@link Functor} can be implemented
+ * in terms of {@link #traverse(Applicative, Function, App)} as {@code map(f, ta) = traverse(IdF, f, ta)}. This
+ * interface leaves that method abstract because of the differing function types in {@link #map(Function, App)}
+ * and {@link #traverse(Applicative, Function, App)} that make the default implementation outline above impossible
+ * without an unchecked (albeit safe) cast.
+ *
  * @param <T>  The container type.
  * @param <Mu> The witness type for this traversable.
  * @dfu.shape %.Type. %0

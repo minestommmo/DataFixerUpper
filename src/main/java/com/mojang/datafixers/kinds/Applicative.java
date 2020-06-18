@@ -25,9 +25,39 @@ import java.util.function.Function;
  * {@linkplain #lift1(App) applying wrapped transformations} and
  * {@linkplain #point(Object) wrapping values in containers}.
  *
+ * <p>In order to be a <em>lawful applicative functor</em>, the implementation of {@link #map(Function, App)}
+ * must satisfy the following requirements ({@code ==} represents logical equality and not reference equality).
+ *
+ * <ol>
+ *     <li>
+ *         {@code ap(point(Function.identity()), fa) = fa} - Applying with the identity function yields the input
+ *         (this is equivalent to the first functor law).
+ *     </li>
+ *     <li>
+ *         {@code ap(point(f), point(a)) = point(f(a))} - Applying a wrapped function to a wrapped value is equivalent
+ *         to wrapping the result of applying the function to the value.
+ *     </li>
+ *     <li>
+ *         {@code ap(ff, point(a)) = ap(point(f -> f(a)), ff)} - Applying a function to a wrapped value is equivalent
+ *         to {@linkplain #map(Function, App) mapping} the application of that function.
+ *     </li>
+ *     <li>
+ *         {@code ap(ff, ap(fg, fa)) = ap(ap(ap(point(f -> f::compose), ff), fg), fa)} - Applying a sequence of
+ *         functions to a single value is equivalent to applying the composition of the functions to that value
+ *         (this is equivalent to the second functor law).
+ *     </li>
+ * </ol>
+ *
+ * <p>In fact, the implementation of {@link #map(Function, App)} can be written in terms of {@link #ap(App, App)}
+ * and {@link #point(Object)} as {@code map(f, fa) = ap(point(f), fa)}. This interface leaves that method abstract
+ * because of the differing function types in {@link #map(Function, App)} and {@link #ap(App, App)} that make
+ * the default implementation outline above impossible without an unchecked (albeit safe) cast.
+ *
  * @param <F>  The container type.
  * @param <Mu> The witness type of this applicative functor.
  * @dfu.shape %.Type.% %0
+ * @see Functor
+ * @see <a href="https://wiki.haskell.org/Typeclassopedia#Laws_2">Applicative Laws</a>
  */
 public interface Applicative<F extends K1, Mu extends Applicative.Mu> extends Functor<F, Mu> {
     /**
@@ -63,9 +93,11 @@ public interface Applicative<F extends K1, Mu extends Applicative.Mu> extends Fu
      * Lifts a wrapped transformation function into a function between containers.
      *
      * @param function The container containing the transformation function.
-     * @param <A> The input type.
-     * @param <R> The output type.
+     * @param <A>      The input type.
+     * @param <R>      The output type.
      * @return The lifted function.
+     * @implSpec The expression {@code lift1(point(f)).apply(fa)} should be equivalent to {@code map(f, fa)} for this
+     * to be a lawful applicative functor.
      */
     <A, R> Function<App<F, A>, App<F, R>> lift1(final App<F, Function<A, R>> function);
 
@@ -73,9 +105,9 @@ public interface Applicative<F extends K1, Mu extends Applicative.Mu> extends Fu
      * Lifts a wrapped {@link BiFunction} into a {@link BiFunction} between containers.
      *
      * @param function The container containing the transformation function.
-     * @param <A> The first input type.
-     * @param <B> The second input type.
-     * @param <R> The output type.
+     * @param <A>      The first input type.
+     * @param <B>      The second input type.
+     * @param <R>      The output type.
      * @return The lifted function.
      */
     default <A, B, R> BiFunction<App<F, A>, App<F, B>, App<F, R>> lift2(final App<F, BiFunction<A, B, R>> function) {
@@ -86,10 +118,10 @@ public interface Applicative<F extends K1, Mu extends Applicative.Mu> extends Fu
      * Lifts a wrapped {@link Function3} into a {@link Function3} between containers.
      *
      * @param function The container containing the transformation function.
-     * @param <T1> The first input type.
-     * @param <T2> The second input type.
-     * @param <T3> The third input type.
-     * @param <R>  The output type.
+     * @param <T1>     The first input type.
+     * @param <T2>     The second input type.
+     * @param <T3>     The third input type.
+     * @param <R>      The output type.
      * @return The lifted function.
      */
     default <T1, T2, T3, R> Function3<App<F, T1>, App<F, T2>, App<F, T3>, App<F, R>> lift3(final App<F, Function3<T1, T2, T3, R>> function) {
@@ -100,11 +132,11 @@ public interface Applicative<F extends K1, Mu extends Applicative.Mu> extends Fu
      * Lifts a wrapped {@link Function4} into a {@link Function4} between containers.
      *
      * @param function The container containing the transformation function.
-     * @param <T1> The first input type.
-     * @param <T2> The second input type.
-     * @param <T3> The third input type.
-     * @param <T4> The fourth input type.
-     * @param <R>  The output type.
+     * @param <T1>     The first input type.
+     * @param <T2>     The second input type.
+     * @param <T3>     The third input type.
+     * @param <T4>     The fourth input type.
+     * @param <R>      The output type.
      * @return The lifted function.
      */
     default <T1, T2, T3, T4, R> Function4<App<F, T1>, App<F, T2>, App<F, T3>, App<F, T4>, App<F, R>> lift4(final App<F, Function4<T1, T2, T3, T4, R>> function) {
@@ -115,12 +147,12 @@ public interface Applicative<F extends K1, Mu extends Applicative.Mu> extends Fu
      * Lifts a wrapped {@link Function5} into a {@link Function5} between containers.
      *
      * @param function The container containing the transformation function.
-     * @param <T1> The first input type.
-     * @param <T2> The second input type.
-     * @param <T3> The third input type.
-     * @param <T4> The fourth input type.
-     * @param <T5> The fifth input type.
-     * @param <R>  The output type.
+     * @param <T1>     The first input type.
+     * @param <T2>     The second input type.
+     * @param <T3>     The third input type.
+     * @param <T4>     The fourth input type.
+     * @param <T5>     The fifth input type.
+     * @param <R>      The output type.
      * @return The lifted function.
      */
     default <T1, T2, T3, T4, T5, R> Function5<App<F, T1>, App<F, T2>, App<F, T3>, App<F, T4>, App<F, T5>, App<F, R>> lift5(final App<F, Function5<T1, T2, T3, T4, T5, R>> function) {
@@ -131,13 +163,13 @@ public interface Applicative<F extends K1, Mu extends Applicative.Mu> extends Fu
      * Lifts a wrapped {@link Function6} into a {@link Function6} between containers.
      *
      * @param function The container containing the transformation function.
-     * @param <T1> The first input type.
-     * @param <T2> The second input type.
-     * @param <T3> The third input type.
-     * @param <T4> The fourth input type.
-     * @param <T5> The fifth input type.
-     * @param <T6> The sixth input type.
-     * @param <R>  The output type.
+     * @param <T1>     The first input type.
+     * @param <T2>     The second input type.
+     * @param <T3>     The third input type.
+     * @param <T4>     The fourth input type.
+     * @param <T5>     The fifth input type.
+     * @param <T6>     The sixth input type.
+     * @param <R>      The output type.
      * @return The lifted function.
      */
     default <T1, T2, T3, T4, T5, T6, R> Function6<App<F, T1>, App<F, T2>, App<F, T3>, App<F, T4>, App<F, T5>, App<F, T6>, App<F, R>> lift6(final App<F, Function6<T1, T2, T3, T4, T5, T6, R>> function) {
@@ -148,14 +180,14 @@ public interface Applicative<F extends K1, Mu extends Applicative.Mu> extends Fu
      * Lifts a wrapped {@link Function7} into a {@link Function7} between containers.
      *
      * @param function The container containing the transformation function.
-     * @param <T1> The first input type.
-     * @param <T2> The second input type.
-     * @param <T3> The third input type.
-     * @param <T4> The fourth input type.
-     * @param <T5> The fifth input type.
-     * @param <T6> The sixth input type.
-     * @param <T7> The seventh input type.
-     * @param <R>  The output type.
+     * @param <T1>     The first input type.
+     * @param <T2>     The second input type.
+     * @param <T3>     The third input type.
+     * @param <T4>     The fourth input type.
+     * @param <T5>     The fifth input type.
+     * @param <T6>     The sixth input type.
+     * @param <T7>     The seventh input type.
+     * @param <R>      The output type.
      * @return The lifted function.
      */
     default <T1, T2, T3, T4, T5, T6, T7, R> Function7<App<F, T1>, App<F, T2>, App<F, T3>, App<F, T4>, App<F, T5>, App<F, T6>, App<F, T7>, App<F, R>> lift7(final App<F, Function7<T1, T2, T3, T4, T5, T6, T7, R>> function) {
@@ -166,15 +198,15 @@ public interface Applicative<F extends K1, Mu extends Applicative.Mu> extends Fu
      * Lifts a wrapped {@link Function8} into a {@link Function8} between containers.
      *
      * @param function The container containing the transformation function.
-     * @param <T1> The first input type.
-     * @param <T2> The second input type.
-     * @param <T3> The third input type.
-     * @param <T4> The fourth input type.
-     * @param <T5> The fifth input type.
-     * @param <T6> The sixth input type.
-     * @param <T7> The seventh input type.
-     * @param <T8> The eighth input type.
-     * @param <R>  The output type.
+     * @param <T1>     The first input type.
+     * @param <T2>     The second input type.
+     * @param <T3>     The third input type.
+     * @param <T4>     The fourth input type.
+     * @param <T5>     The fifth input type.
+     * @param <T6>     The sixth input type.
+     * @param <T7>     The seventh input type.
+     * @param <T8>     The eighth input type.
+     * @param <R>      The output type.
      * @return The lifted function.
      */
     default <T1, T2, T3, T4, T5, T6, T7, T8, R> Function8<App<F, T1>, App<F, T2>, App<F, T3>, App<F, T4>, App<F, T5>, App<F, T6>, App<F, T7>, App<F, T8>, App<F, R>> lift8(final App<F, Function8<T1, T2, T3, T4, T5, T6, T7, T8, R>> function) {
@@ -185,16 +217,16 @@ public interface Applicative<F extends K1, Mu extends Applicative.Mu> extends Fu
      * Lifts a wrapped {@link Function9} into a {@link Function9} between containers.
      *
      * @param function The container containing the transformation function.
-     * @param <T1> The first input type.
-     * @param <T2> The second input type.
-     * @param <T3> The third input type.
-     * @param <T4> The fourth input type.
-     * @param <T5> The fifth input type.
-     * @param <T6> The sixth input type.
-     * @param <T7> The seventh input type.
-     * @param <T8> The eighth input type.
-     * @param <T9> The ninth input type.
-     * @param <R>  The output type.
+     * @param <T1>     The first input type.
+     * @param <T2>     The second input type.
+     * @param <T3>     The third input type.
+     * @param <T4>     The fourth input type.
+     * @param <T5>     The fifth input type.
+     * @param <T6>     The sixth input type.
+     * @param <T7>     The seventh input type.
+     * @param <T8>     The eighth input type.
+     * @param <T9>     The ninth input type.
+     * @param <R>      The output type.
      * @return The lifted function.
      */
     default <T1, T2, T3, T4, T5, T6, T7, T8, T9, R> Function9<App<F, T1>, App<F, T2>, App<F, T3>, App<F, T4>, App<F, T5>, App<F, T6>, App<F, T7>, App<F, T8>, App<F, T9>, App<F, R>> lift9(final App<F, Function9<T1, T2, T3, T4, T5, T6, T7, T8, T9, R>> function) {
@@ -204,14 +236,13 @@ public interface Applicative<F extends K1, Mu extends Applicative.Mu> extends Fu
     /**
      * Maps the contents of {@code arg} from {@code A} to {@code R} using a wrapped transformation function.
      *
-     * @implSpec The default implementation {@linkplain #lift1(App) lifts} the wrapped function
-     * and applies it to the {@code arg}.
-     *
      * @param func The wrapped transformation function.
      * @param arg  The input container that will be transformed.
      * @param <A>  The input type.
      * @param <R>  The output type.
      * @return The transformed container.
+     * @implSpec The default implementation {@linkplain #lift1(App) lifts} the wrapped function
+     * and applies it to the {@code arg}.
      */
     default <A, R> App<F, R> ap(final App<F, Function<A, R>> func, final App<F, A> arg) {
         return lift1(func).apply(arg);
@@ -221,13 +252,12 @@ public interface Applicative<F extends K1, Mu extends Applicative.Mu> extends Fu
      * Maps the contents of {@code arg} from {@code A} to {@code R} using the {@code func}.
      * This method is equivalent to {@link #map(Function, App)}.
      *
-     * @implSpec The default implementation delegates to {@link #map(Function, App)}.
-     *
      * @param func The transformation function.
      * @param arg  The input container that will be transformed.
      * @param <A>  The input type.
      * @param <R>  The output type.
      * @return The transformed container.
+     * @implSpec The default implementation delegates to {@link #map(Function, App)}.
      * @see #map(Function, App)
      */
     default <A, R> App<F, R> ap(final Function<A, R> func, final App<F, A> arg) {
