@@ -14,6 +14,7 @@ import java.util.function.Function;
  * @param <C>  The other type of interest in the product type.
  * @param <Mu> The witness type of this functor.
  * @dfu.shape %.Type. %0
+ * @see com.mojang.datafixers.optics.profunctors.Cartesian
  */
 public interface CartesianLike<T extends K1, C, Mu extends CartesianLike.Mu> extends Functor<T, Mu>, Traversable<T, Mu> {
     /**
