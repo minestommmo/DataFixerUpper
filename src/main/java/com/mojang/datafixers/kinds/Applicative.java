@@ -25,26 +25,44 @@ import java.util.function.Function;
  * {@linkplain #lift1(App) applying wrapped transformations} and
  * {@linkplain #point(Object) wrapping values in containers}.
  *
- * <p>In order to be a <em>lawful applicative functor</em>, the implementation of {@link #map(Function, App)}
- * must satisfy the following requirements ({@code ==} represents logical equality and not reference equality).
+ * <p>In order to be a <em>lawful applicative functor</em>, the implementations of {@link #ap(App, App)} and
+ * {@link #point(Object)} must satisfy the following requirements ({@code ==} represents logical equality and not
+ * reference equality).
  *
  * <ol>
  *     <li>
  *         {@code ap(point(Function.identity()), fa) = fa} - Applying with the identity function yields the input
- *         (this is equivalent to the first functor law).
+ *         (this is related to the first functor law).
  *     </li>
  *     <li>
  *         {@code ap(point(f), point(a)) = point(f(a))} - Applying a wrapped function to a wrapped value is equivalent
  *         to wrapping the result of applying the function to the value.
  *     </li>
  *     <li>
- *         {@code ap(ff, point(a)) = ap(point(f -> f(a)), ff)} - Applying a function to a wrapped value is equivalent
- *         to {@linkplain #map(Function, App) mapping} the application of that function.
+ *         {@code ap(ff, point(a)) = ap(point(f -> f(a)), ff)} - Wrapping a value before applying a function is
+ *         equivalent to wrapping the resulting value after applying the function.
  *     </li>
  *     <li>
- *         {@code ap(ff, ap(fg, fa)) = ap(ap(ap(point(f -> f::compose), ff), fg), fa)} - Applying a sequence of
- *         functions to a single value is equivalent to applying the composition of the functions to that value
- *         (this is equivalent to the second functor law).
+ *         {@code ap(ff, ap(fg, fa)) = ap(ap(ap(point(f -> f::compose), ff), fg), fa)} - Composing applications is
+ *         equivalent to applying compositions (this is related to the second functor law).
+ *     </li>
+ * </ol>
+ *
+ * <p>These laws may be made more intuitive my replacing {@code ap(ff, fa)} with the expression {@code ff[fa]},
+ * analogous to normal function application {@code f(a)}.
+ *
+ * <ol>
+ *     <li>
+ *         {@code point(Function.identity())[fa] = fa}
+ *     </li>
+ *     <li>
+ *         {@code point(f)[point(a)] = point(f(a))}
+ *     </li>
+ *     <li>
+ *         {@code ff[point(a)] = point(f -> f(a))[ff]}
+ *     </li>
+ *     <li>
+ *         {@code ff[fg[fa]] = point(f -> f::compose)[ff][fg][fa]}
  *     </li>
  * </ol>
  *
