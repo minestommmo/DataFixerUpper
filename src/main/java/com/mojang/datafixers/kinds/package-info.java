@@ -61,6 +61,24 @@
  * type classes in DFU declare additional type parameters, but these additional parameters are unnecessary to
  * understand the types being used.
  *
+ * <p>To get an idea of what the custom rendering does, take this method in {@link com.mojang.datafixers.kinds.ListBox.Instance}.
+ *
+ * <pre>{@code
+ * <F extends K1, A, B> App<F, App<ListBox.Mu, B>> traverse(
+ *      Applicative<F, ?> applicative,
+ *      Function<A, App<F, B>> function,
+ *      App<ListBox.Mu, A> input)
+ * }</pre>
+ *
+ * <p>Using the custom rendering, the method signature appears like this.
+ *
+ * <pre>{@code
+ * <F extends K1, A, B> F<ListBox<B>> traverse(
+ *      Applicative F applicative,
+ *      (A) -> F<B> function,
+ *      ListBox<A> input)
+ * }</pre>
+ *
  * @see <a href="https://en.wikipedia.org/wiki/Type_class">Type Class</a>
  */
 package com.mojang.datafixers.kinds;
