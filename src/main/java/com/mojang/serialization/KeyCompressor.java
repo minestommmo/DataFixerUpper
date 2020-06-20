@@ -76,7 +76,7 @@ public final class KeyCompressor<T> {
      * represent a valid key, {@code -1} is returned.
      *
      * @param key The string representation of a key.
-     * @return The index associated with that key, or {@code null} if the key does not exist.
+     * @return The index associated with that key, or {@code -1} if the key does not exist.
      * @implNote This method incurs at most two lookups and runs in constant time.
      * @see #compress(Object)
      */
