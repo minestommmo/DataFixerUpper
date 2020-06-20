@@ -8,6 +8,8 @@ import com.mojang.datafixers.kinds.K1;
 import com.mojang.datafixers.kinds.K2;
 import com.mojang.datafixers.kinds.Kind2;
 
+import java.util.function.Function;
+
 /**
  * A type class that defines a method {@link #distribute(App, App2)} that wraps the input and output of a profunctor
  * into an effect defined via a {@linkplain com.mojang.datafixers.kinds.Functor functor}.
@@ -44,6 +46,9 @@ public interface FunctorProfunctor<T extends K1, P extends K2, Mu extends Functo
     /**
      * Wraps the input and output of the given transformation in the given functor.
      *
+     * <p>This method is equivalent to {@link com.mojang.datafixers.kinds.Functor#map(Function, App)}, but generalized
+     * to operate on any {@link Profunctor}.
+     *
      * @param proof The type class instance for the desired functor.
      * @param input The transformation.
      * @param <A>   The input type of the transformation.
@@ -52,6 +57,7 @@ public interface FunctorProfunctor<T extends K1, P extends K2, Mu extends Functo
      * @return A transformation between types wrapped in the given functor.
      * @apiNote This method <em>distributes</em> the functor {@code F} across the arguments of the profunctor {@code P},
      * hence the name {@code distribute}.
+     * @see com.mojang.datafixers.kinds.Functor#map(Function, App)
      */
     <A, B, F extends K1> App2<P, App<F, A>, App<F, B>> distribute(final App<? extends T, F> proof, final App2<P, A, B> input);
 }
