@@ -38,13 +38,15 @@ public interface Cartesian<P extends K2, Mu extends Cartesian.Mu> extends Profun
      * @dfu.shape %.Mu. %^1
      */
     interface Mu extends Profunctor.Mu {
+        /**
+         * The value representing the witness type {@link Cartesian.Mu}.
+         */
         TypeToken<Mu> TYPE_TOKEN = new TypeToken<Mu>() {};
     }
 
     /**
-     * Converts the given transformation into one that acts on pairs, where the transformed element is the first.
-     * The second type in the pair is not transformed - any values of that type are ignored in the returned
-     * transformation.
+     * Converts the given transformation into one that transforms the first type of a {@link Pair}. The second type
+     * is not transformed - any values of that type are ignored in the returned transformation.
      *
      * @param input The transformation.
      * @param <A>   The input type.
@@ -55,9 +57,8 @@ public interface Cartesian<P extends K2, Mu extends Cartesian.Mu> extends Profun
     <A, B, C> App2<P, Pair<A, C>, Pair<B, C>> first(final App2<P, A, B> input);
 
     /**
-     * Converts the given transformation into one that acts on pairs, where the transformed element is the second.
-     * The first type in the pair is not transformed - any values of that type are ignored in the returned
-     * transformation.
+     * Converts the given transformation into one that transforms the second type of a {@link Pair}. The first type
+     * is not transformed - any values of that type are ignored in the returned transformation.
      *
      * @param input The transformation.
      * @param <A>   The input type.
@@ -72,7 +73,7 @@ public interface Cartesian<P extends K2, Mu extends Cartesian.Mu> extends Profun
     }
 
     /**
-     * Converts this profunctor into a {@link FunctorProfunctor} that operates with {@link CartesianLike} functors.
+     * Converts this profunctor into a {@link FunctorProfunctor} that distributes {@link CartesianLike} functors.
      */
     default FunctorProfunctor<CartesianLike.Mu, P, FunctorProfunctor.Mu<CartesianLike.Mu>> toFP2() {
         return new FunctorProfunctor<CartesianLike.Mu, P, FunctorProfunctor.Mu<CartesianLike.Mu>>() {
