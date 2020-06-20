@@ -46,7 +46,7 @@ public interface Cartesian<P extends K2, Mu extends Cartesian.Mu> extends Profun
 
     /**
      * Converts the given transformation into one that transforms the first type of a {@link Pair}. The second type
-     * is not transformed - any values of that type are ignored in the returned transformation.
+     * is not transformed - any values of that type are passed through the returned transformation unchanged.
      *
      * @param input The transformation.
      * @param <A>   The input type.
@@ -58,7 +58,7 @@ public interface Cartesian<P extends K2, Mu extends Cartesian.Mu> extends Profun
 
     /**
      * Converts the given transformation into one that transforms the second type of a {@link Pair}. The first type
-     * is not transformed - any values of that type are ignored in the returned transformation.
+     * is not transformed - any values of that type are passed through the returned transformation unchanged.
      *
      * @param input The transformation.
      * @param <A>   The input type.
