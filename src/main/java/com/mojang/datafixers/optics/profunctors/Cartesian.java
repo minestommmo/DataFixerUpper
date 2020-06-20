@@ -10,21 +10,70 @@ import com.mojang.datafixers.kinds.K1;
 import com.mojang.datafixers.kinds.K2;
 import com.mojang.datafixers.util.Pair;
 
+/**
+ * A profunctor that supports converting a transformation acting on some type to and from a transformation acting
+ * on pairs holding that type. This allows one to add a "pass-through" value to the type transformed via the
+ * profunctor that is left untransformed.
+ *
+ * @param <P>  The transformation type.
+ * @param <Mu> The witness type for this profunctor.
+ * @dfu.shape %.Type. %0
+ */
 public interface Cartesian<P extends K2, Mu extends Cartesian.Mu> extends Profunctor<P, Mu> {
+    /**
+     * Thunk method that casts an applied {@link Cartesian.Mu} to a {@link Cartesian}.
+     *
+     * @param proofBox The boxed {@link Cartesian}.
+     * @param <P>      The transformation type.
+     * @param <Proof>  The witness type for the profunctor.
+     * @return The unboxed {@link Cartesian}.
+     */
     static <P extends K2, Proof extends Cartesian.Mu> Cartesian<P, Proof> unbox(final App<Proof, P> proofBox) {
         return (Cartesian<P, Proof>) proofBox;
     }
 
+    /**
+     * The witness type for {@link Cartesian}.
+     *
+     * @dfu.shape %.Mu. %^1
+     */
     interface Mu extends Profunctor.Mu {
         TypeToken<Mu> TYPE_TOKEN = new TypeToken<Mu>() {};
     }
 
+    /**
+     * Converts the given transformation into one that acts on pairs, where the transformed element is the first.
+     * The second type in the pair is not transformed - any values of that type are ignored in the returned
+     * transformation.
+     *
+     * @param input The transformation.
+     * @param <A>   The input type.
+     * @param <B>   The output type.
+     * @param <C>   A "pass-through" type that is not transformed.
+     * @return A transformation on pairs, where the first type is transformed and the second is not.
+     */
     <A, B, C> App2<P, Pair<A, C>, Pair<B, C>> first(final App2<P, A, B> input);
 
+    /**
+     * Converts the given transformation into one that acts on pairs, where the transformed element is the second.
+     * The first type in the pair is not transformed - any values of that type are ignored in the returned
+     * transformation.
+     *
+     * @param input The transformation.
+     * @param <A>   The input type.
+     * @param <B>   The output type.
+     * @param <C>   A "pass-through" type that is not transformed.
+     * @return A transformation on pairs, where the second type is transformed and the first is not.
+     * @implSpec The default implementation calls {@link #first(App2)} and swaps the order of the types in the
+     * {@link Pair}.
+     */
     default <A, B, C> App2<P, Pair<C, A>, Pair<C, B>> second(final App2<P, A, B> input) {
         return dimap(first(input), Pair::swap, Pair::swap);
     }
 
+    /**
+     * Converts this profunctor into a {@link FunctorProfunctor} that operates with {@link CartesianLike} functors.
+     */
     default FunctorProfunctor<CartesianLike.Mu, P, FunctorProfunctor.Mu<CartesianLike.Mu>> toFP2() {
         return new FunctorProfunctor<CartesianLike.Mu, P, FunctorProfunctor.Mu<CartesianLike.Mu>>() {
             @Override
