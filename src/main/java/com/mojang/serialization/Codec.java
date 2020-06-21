@@ -41,6 +41,8 @@ import java.util.stream.Stream;
  * mutate the codec in a way visible to the outside.
  *
  * @param <A> The type this {@link Codec} serializes and deserializes.
+ * @implSpec An implementation must include, at a minimum, definitions of the {@link #encode(Object, DynamicOps, Object)}
+ * and {@link #decode(DynamicOps, Object)} methods.
  * @implNote The default methods in this interface that return codecs or {@linkplain MapCodec map codecs}
  * wrap this codec without adding any debugging context. These methods should be overridden if deeply nested
  * codecs are undesirable or additional debugging context is desired.
