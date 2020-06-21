@@ -20,7 +20,7 @@ import java.util.stream.Stream;
  * record fields. While a {@link MapCodec} is not itself a {@link Codec}, it may be turned into one via the
  * {@link #codec()} method.
  *
- * <p>Implementations of {@link Codec} are immutable once created. The methods defined in this interface never
+ * <p>Implementations of {@link MapCodec} are immutable once created. The methods defined in this interface never
  * mutate the codec in a way visible to the outside.
  *
  * @param <A> The type this {@link MapCodec} serializes and deserializes.
