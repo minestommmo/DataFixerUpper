@@ -486,9 +486,8 @@ public interface Codec<A> extends Encoder<A>, Decoder<A> {
     }
 
     /**
-     * A unary operator applied on the result obtained from decoding or encoding. This can be used to directly
-     * transform the {@link DataResult} returned from decoding and encoding methods, rather than the wrapped
-     * result.
+     * A unary operator applied on the result obtained from decoding or encoding from a {@link Codec}. This can be used
+     * to directly transform the {@link DataResult} returned from the decoding and encoding methods.
      *
      * @param <A> The type this operator transforms.
      */
