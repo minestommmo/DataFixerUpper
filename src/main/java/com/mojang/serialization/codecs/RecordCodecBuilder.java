@@ -23,9 +23,69 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+/**
+ * An class that enables the aggregation of many {@link MapCodec map codecs} into a single codec for some complete
+ * type. This allows for building a single codec out of the codecs for many independent fields.
+ *
+ * <p>Typically, {@link RecordCodecBuilder} is used to create a codec for a record like the following.
+ *
+ * <pre><code>
+ * public class SomeRecord {
+ *     private int intValue;
+ *     private String stringValue;
+ *     private List&lt;String&gt; stringValues;
+ *
+ *     public SomeRecord(int i, String s, List&lt;String&gt; ls) {
+ *         this.intValue = i;
+ *         this.stringValue = s;
+ *         this.stringValues = ls;
+ *     }
+ *
+ *     // methods elided
+ * }</code></pre>
+ *
+ * <p>A codec for this type may be created like so.
+ *
+ * <pre><code>
+ * public static final Codec&lt;SomeRecord&gt; CODEC = RecordCodecBuilder.create(inst -> inst.group(
+ *     Codec.INT.fieldOf("IntValue").forGetter(r -> r.intValue),
+ *     Codec.STRING.fieldOf("StringValue").forGetter(r -> r.stringValue),
+ *     Codec.STRING.listOf().fieldOf("StringValues").forGetter(r -> r.stringValues)
+ * ).apply(inst, SomeRecord::new));</code></pre>
+ *
+ * <p>Each independent record field is added to the builder using {@link Codec#fieldOf(String)} (which specifies which
+ * field in the record the codec is for) and {@link MapCodec#forGetter(Function)} (which specifies how to get the field
+ * value out of the record). These record field codecs are then aggregated and a combining function (typically a
+ * constructor or factory method) combines the fields into an instance of the complete record.
+ *
+ * <p>Note that the "record" in {@link RecordCodecBuilder} does not refer to the Java concept of a record, but rather
+ * to any object that can be logically serialized as a set of fields.
+ *
+ * @param <O> The type of the complete object.
+ * @param <F> The type of the field or collection of fields handled by this builder.
+ * @see #create(Function)
+ * @see RecordCodecBuilder.Instance
+ * @see com.mojang.datafixers.Products
+ * @see Codec#fieldOf(String)
+ * @see MapCodec#forGetter(Function)
+ */
 public final class RecordCodecBuilder<O, F> implements App<RecordCodecBuilder.Mu<O>, F> {
+    /**
+     * The witness type of a {@link RecordCodecBuilder}.
+     *
+     * @param <O> The type of the complete object.
+     * @dfu.shape %.Mu.[%0,%^1]
+     */
     public static final class Mu<O> implements K1 {}
 
+    /**
+     * Thunk method that casts an applied {@link RecordCodecBuilder.Mu} to a {@link RecordCodecBuilder}.
+     *
+     * @param box The boxed builder.
+     * @param <O> The type of the complete object.
+     * @param <F> The type of the field or collection of fields handled by the builder.
+     * @return The unboxed builder.
+     */
     public static <O, F> RecordCodecBuilder<O, F> unbox(final App<Mu<O>, F> box) {
         return ((RecordCodecBuilder<O, F>) box);
     }
@@ -40,38 +100,120 @@ public final class RecordCodecBuilder<O, F> implements App<RecordCodecBuilder.Mu
         this.decoder = decoder;
     }
 
+    /**
+     * Returns the <em>applicative type class instance</em> for {@link RecordCodecBuilder}.
+     *
+     * @param <O> The type of the complete object.
+     * @return The applicative type class instance for {@link RecordCodecBuilder}.
+     * @see Applicative
+     */
     public static <O> Instance<O> instance() {
         return new Instance<>();
     }
 
+    /**
+     * Creates a builder for a single field in some object, given a field name and a {@link Codec} for that field.
+     *
+     * @param getter     A function that extracts the value of the field from a complete object.
+     * @param name       The name the field is serialized under.
+     * @param fieldCodec A {@link Codec} for the field.
+     * @param <O>        The type of the complete object.
+     * @param <F>        The type of the field.
+     * @return A builder for a single field in some object.
+     */
     public static <O, F> RecordCodecBuilder<O, F> of(final Function<O, F> getter, final String name, final Codec<F> fieldCodec) {
         return of(getter, fieldCodec.fieldOf(name));
     }
 
+    /**
+     * Creates a builder for a field or collection of fields in some object, given a map codec for the fields.
+     *
+     * @param getter A function that extracts the fields from a complete object.
+     * @param codec  A {@link MapCodec} for the fields.
+     * @param <O>    The type of the complete object.
+     * @param <F>    The type of the field or collection of fields.
+     * @return A builder for the fields.
+     */
     public static <O, F> RecordCodecBuilder<O, F> of(final Function<O, F> getter, final MapCodec<F> codec) {
         return new RecordCodecBuilder<>(getter, o -> codec, codec);
     }
 
+    /**
+     * Creates a builder for an experimental singleton field value. This is equivalent to {@link #point(Object, Lifecycle)}
+     * invoked with {@link Lifecycle#experimental()}.
+     *
+     * @param instance The singleton value.
+     * @param <O>      The type of the complete object.
+     * @param <F>      The type of the field.
+     * @return A builder for a singleton field value.
+     * @see Codec#unit(Object)
+     */
     public static <O, F> RecordCodecBuilder<O, F> point(final F instance) {
         return new RecordCodecBuilder<>(o -> instance, o -> Encoder.empty(), Decoder.unit(instance));
     }
 
+    /**
+     * Creates a builder for a stable singleton value. This method is equivalent to {@link #point(Object, Lifecycle)}
+     * invoked with {@link Lifecycle#stable()}.
+     *
+     * @param instance The singleton value.
+     * @param <O>      The type of the complete object.
+     * @param <F>      The type of the field.
+     * @return A builder for the singleton field value.
+     */
     public static <O, F> RecordCodecBuilder<O, F> stable(final F instance) {
         return point(instance, Lifecycle.stable());
     }
 
+    /**
+     * Creates a builder for a deprecated singleton value. This method is equivalent to {@link #point(Object, Lifecycle)}
+     * invoked with {@link Lifecycle#deprecated(int)}.
+     *
+     * @param instance The singleton value.
+     * @param since    The deprecation version.
+     * @param <O>      The type of the complete object.
+     * @param <F>      The type of the field.
+     * @return A builder for the singleton field value.
+     */
     public static <O, F> RecordCodecBuilder<O, F> deprecated(final F instance, final int since) {
         return point(instance, Lifecycle.deprecated(since));
     }
 
+    /**
+     * Creates a builder for a singleton value with the given lifecycle.
+     *
+     * @param instance  The singleton value.
+     * @param lifecycle The lifecycle of the given field value.
+     * @param <O>       The type of the complete object.
+     * @param <F>       The type of the field.
+     * @return A builder for the singleton field value.
+     */
     public static <O, F> RecordCodecBuilder<O, F> point(final F instance, final Lifecycle lifecycle) {
         return new RecordCodecBuilder<>(o -> instance, o -> Encoder.<F>empty().withLifecycle(lifecycle), Decoder.unit(instance).withLifecycle(lifecycle));
     }
 
+    /**
+     * Creates a {@link Codec} using the fields provided via the given function. The builder function is expected
+     * to create a {@link RecordCodecBuilder} for a complete object with some set of fields.
+     *
+     * @param builder A function that produces a builder for some set of fields.
+     * @param <O>     The type of the complete object.
+     * @return A {@link Codec} for the complete object type.
+     * @see RecordCodecBuilder
+     */
     public static <O> Codec<O> create(final Function<Instance<O>, ? extends App<Mu<O>, O>> builder) {
         return build(builder.apply(instance())).codec();
     }
 
+    /**
+     * Creates a {@link MapCodec} using the fields provided via the given function. The builder function is expected
+     * to create a {@link RecordCodecBuilder} for a complete object with some set of fields.
+     *
+     * @param builder A function that produces a builder for some set of fields.
+     * @param <O>     The type of the complete object.
+     * @return A {@link Codec} for the complete object type.
+     * @see #create(Function)
+     */
     public static <O> MapCodec<O> mapCodec(final Function<Instance<O>, ? extends App<Mu<O>, O>> builder) {
         return build(builder.apply(instance()));
     }
@@ -99,6 +241,13 @@ public final class RecordCodecBuilder<O, F> implements App<RecordCodecBuilder.Mu
         );
     }
 
+    /**
+     * Builds a {@link MapCodec} that operates on the fields defined using the given {@link RecordCodecBuilder}.
+     *
+     * @param builderBox The builder.
+     * @param <O>        The type of the complete object.
+     * @return A {@link MapCodec} created from the given builder.
+     */
     public static <O> MapCodec<O> build(final App<Mu<O>, O> builderBox) {
         final RecordCodecBuilder<O, O> builder = unbox(builderBox);
         return new MapCodec<O>() {
@@ -124,21 +273,66 @@ public final class RecordCodecBuilder<O, F> implements App<RecordCodecBuilder.Mu
         };
     }
 
+    /**
+     * The {@link Applicative} instance for {@link RecordCodecBuilder}.
+     *
+     * @param <O> The type of the complete object.
+     * @dfu.shape instance %.Mu.[%0,_]
+     */
     public static final class Instance<O> implements Applicative<Mu<O>, Instance.Mu<O>> {
+        /**
+         * The witness type for {@link RecordCodecBuilder.Instance}.
+         *
+         * @param <O> The type of the complete object.
+         * @dfu.shape instance %^1
+         */
         private static final class Mu<O> implements Applicative.Mu {}
 
+        /**
+         * Creates a builder for the given singleton field value with the stable lifecycle.
+         *
+         * @param a   The singleton value.
+         * @param <A> The type of the field.
+         * @return A builder with the given singleton field.
+         * @see RecordCodecBuilder#stable(Object)
+         */
         public <A> App<RecordCodecBuilder.Mu<O>, A> stable(final A a) {
             return RecordCodecBuilder.stable(a);
         }
 
+        /**
+         * Creates a builder for the given singleton field value with a deprecated lifecycle.
+         *
+         * @param a   The singleton value.
+         * @param <A> The type of the field.
+         * @return A builder with the given singleton field.
+         * @see RecordCodecBuilder#deprecated(Object, int)
+         */
         public <A> App<RecordCodecBuilder.Mu<O>, A> deprecated(final A a, final int since) {
             return RecordCodecBuilder.deprecated(a, since);
         }
 
+        /**
+         * Creates a builder for the given singleton field value with the given lifecycle.
+         *
+         * @param a         The singleton value.
+         * @param lifecycle The lifecycle of the value.
+         * @param <A>       The type of the field.
+         * @return A builder with the given singleton field.
+         * @see RecordCodecBuilder#point(Object, Lifecycle)
+         */
         public <A> App<RecordCodecBuilder.Mu<O>, A> point(final A a, final Lifecycle lifecycle) {
             return RecordCodecBuilder.point(a, lifecycle);
         }
 
+        /**
+         * Creates a builder for the given singleton field value with the experimental lifecycle.
+         *
+         * @param a   The singleton value.
+         * @param <A> The type of the field.
+         * @return A builder with the given singleton field.
+         * @see RecordCodecBuilder#point(Object)
+         */
         @Override
         public <A> App<RecordCodecBuilder.Mu<O>, A> point(final A a) {
             return RecordCodecBuilder.point(a);
