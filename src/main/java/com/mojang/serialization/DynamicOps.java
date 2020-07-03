@@ -3,7 +3,6 @@
 package com.mojang.serialization;
 
 import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.util.Function3;
 import com.mojang.datafixers.util.Pair;
 import org.apache.commons.lang3.mutable.MutableObject;
 
@@ -665,46 +664,9 @@ public interface DynamicOps<T> {
      * Returns a new {@link ListBuilder} for creating lists of the serialized type.
      *
      * @implSpec The default implementation returns a new instance of {@link ListBuilder.Builder}.
-     * @see #list(Iterable, Object, Encoder)
      */
     default ListBuilder<T> listBuilder() {
         return new ListBuilder.Builder<>(this);
-    }
-
-    /**
-     * Serializes a list of objects to the serialized type using the given element {@link Encoder}.
-     *
-     * @param list    The list of objects to serialize.
-     * @param prefix  The existing serialized list to merge with.
-     * @param encoder The element encoder.
-     * @param <E>     The element type.
-     * @return The serialized list of objects.
-     * @implSpec The default implementation adds each element of the list to the builder returned
-     * by {@link #listBuilder()}.
-     * @see #createList(Stream)
-     */
-    default <E> DataResult<T> list(final Iterable<E> list, final T prefix, final Encoder<E> encoder) {
-        final ListBuilder<T> builder = listBuilder();
-        builder.addAll(list, encoder);
-        return builder.build(prefix);
-    }
-
-    /**
-     * Serializes a list of objects to the serialized type using the given element serialization function.
-     *
-     * @param list              The list of objects to serialize.
-     * @param prefix            The existing serialized list to merge with.
-     * @param elementSerializer A function that serializes values of the element type.
-     * @param <E>               The element type.
-     * @return The serialized list of objects.
-     * @implSpec The default implementation adds each element of the list to the builder returned
-     * by {@link #listBuilder()}.
-     * @see #list(Iterable, Object, Encoder)
-     */
-    default <E> DataResult<T> list(final Iterable<E> list, final T prefix, final Function<? super E, ? extends DataResult<T>> elementSerializer) {
-        final ListBuilder<T> builder = listBuilder();
-        list.forEach(element -> builder.add(elementSerializer.apply(element)));
-        return builder.build(prefix);
     }
 
     /**
@@ -714,48 +676,6 @@ public interface DynamicOps<T> {
      */
     default RecordBuilder<T> mapBuilder() {
         return new RecordBuilder.MapBuilder<>(this);
-    }
-
-    /**
-     * Serializes a map of objects to the serialized type using the given key and value serialization functions.
-     *
-     * @param map               The map of objects to serialize.
-     * @param prefix            The existing serialized list to merge with.
-     * @param keySerializer     A function that serializes values of the key type.
-     * @param elementSerializer A function that serializes values of the element type.
-     * @param <K>               The key type.
-     * @param <V>               The element type.
-     * @return The serialized map of objects.
-     * @implSpec The default implementation adds each entry in the map to the builder returned
-     * by {@link #mapBuilder()}.
-     */
-    default <K, V> DataResult<T> map(final Map<K, V> map, final T prefix, final Function<? super K, ? extends DataResult<T>> keySerializer, final Function<? super V, ? extends DataResult<T>> elementSerializer) {
-        final RecordBuilder<T> builder = mapBuilder();
-        map.forEach((key, value) -> builder.add(keySerializer.apply(key), elementSerializer.apply(value)));
-        return builder.build(prefix);
-    }
-
-    /**
-     * Performs a reduction operation on the map entries extracted from the input. Specifically, this method
-     * performs a left fold on the entries extracted from the input.
-     *
-     * @param input    The serialized value.
-     * @param empty    An empty or identity element of the result type.
-     * @param combiner Combines the current serialized key, value, and previous result to produce a new result.
-     * @param <R>      The result type.
-     * @return A {@link DataResult} containing the final result.
-     * @implSpec The default implementation extracts the entries using {@link #getMapValues(Object)}, then
-     * accumulates the final result value by iterating over the stream in encounter order.
-     * @see Stream#reduce(Object, BiFunction, BinaryOperator)
-     * @see <a href="https://en.wikipedia.org/wiki/Fold_(higher-order_function)">The fold higher order function</a>
-     */
-    default <R> DataResult<R> readMap(final T input, final DataResult<R> empty, final Function3<R, T, T, DataResult<R>> combiner) {
-        return getMapValues(input).flatMap(stream -> {
-            // TODO: AtomicReference.getPlain/setPlain in java9+
-            final MutableObject<DataResult<R>> result = new MutableObject<>(empty);
-            stream.forEach(p -> result.setValue(result.getValue().flatMap(r -> combiner.apply(r, p.getFirst(), p.getSecond()))));
-            return result.getValue();
-        });
     }
 
     /**

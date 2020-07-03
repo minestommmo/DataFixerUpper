@@ -56,7 +56,7 @@ public abstract class MapCodec<A> extends CompressorHolder implements MapDecoder
      * @return A {@link MapCodec} that encodes and decodes values based on the provided encoder and decoder.
      */
     public static <A> MapCodec<A> of(final MapEncoder<A> encoder, final MapDecoder<A> decoder) {
-        return of(encoder, decoder, "MapCodec[" + encoder + " " + decoder + "]");
+        return of(encoder, decoder, () -> "MapCodec[" + encoder + " " + decoder + "]");
     }
 
     /**
@@ -69,7 +69,7 @@ public abstract class MapCodec<A> extends CompressorHolder implements MapDecoder
      * @param <A>     The type that the returned {@link MapCodec} operates on.
      * @return A {@link MapCodec} that encodes and decodes values based on the provided encoder and decoder.
      */
-    public static <A> MapCodec<A> of(final MapEncoder<A> encoder, final MapDecoder<A> decoder, final String name) {
+    public static <A> MapCodec<A> of(final MapEncoder<A> encoder, final MapDecoder<A> decoder, final Supplier<String> name) {
         return new MapCodec<A>() {
             @Override
             public <T> Stream<T> keys(final DynamicOps<T> ops) {
@@ -88,7 +88,7 @@ public abstract class MapCodec<A> extends CompressorHolder implements MapDecoder
 
             @Override
             public String toString() {
-                return name;
+                return name.get();
             }
         };
     }
@@ -222,7 +222,7 @@ public abstract class MapCodec<A> extends CompressorHolder implements MapDecoder
      * @see #comap(Function)
      */
     public <S> MapCodec<S> xmap(final Function<? super A, ? extends S> to, final Function<? super S, ? extends A> from) {
-        return MapCodec.of(comap(from), map(to), toString() + "[xmapped]");
+        return MapCodec.of(comap(from), map(to), () -> toString() + "[xmapped]");
     }
 
     /**
@@ -241,7 +241,7 @@ public abstract class MapCodec<A> extends CompressorHolder implements MapDecoder
      * @see #flatComap(Function)
      */
     public <S> MapCodec<S> flatXmap(final Function<? super A, ? extends DataResult<? extends S>> to, final Function<? super S, ? extends DataResult<? extends A>> from) {
-        return Codec.of(flatComap(from), flatMap(to), toString() + "[flatXmapped]");
+        return Codec.of(flatComap(from), flatMap(to), () -> toString() + "[flatXmapped]");
     }
 
     /**
@@ -327,7 +327,7 @@ public abstract class MapCodec<A> extends CompressorHolder implements MapDecoder
      *
      * @param <A> The type this operator transforms.
      */
-    interface ResultFunction<A> {
+    public interface ResultFunction<A> {
         /**
          * Applies a transformation to the result of decoding an object. This transformation may read
          * more fields from the map, or transform successes into errors and visa-versa.
@@ -360,7 +360,7 @@ public abstract class MapCodec<A> extends CompressorHolder implements MapDecoder
      * @param function The transformation to apply to results.
      * @return A map codec that applies the given transformation after encoding and decoding values.
      */
-    private MapCodec<A> mapResult(final ResultFunction<A> function) {
+    public MapCodec<A> mapResult(final ResultFunction<A> function) {
         return new MapCodec<A>() {
             @Override
             public <T> Stream<T> keys(final DynamicOps<T> ops) {
@@ -392,8 +392,8 @@ public abstract class MapCodec<A> extends CompressorHolder implements MapDecoder
      * @param value   The default value to use if a decoding error occurs and no partial result is present.
      * @return A map codec that returns the default value from its decode method if decoding returns an error.
      */
-    public MapCodec<A> withDefault(final Consumer<String> onError, final A value) {
-        return withDefault(DataFixUtils.consumerToFunction(onError), value);
+    public MapCodec<A> orElse(final Consumer<String> onError, final A value) {
+        return orElse(DataFixUtils.consumerToFunction(onError), value);
     }
 
     /**
@@ -404,7 +404,7 @@ public abstract class MapCodec<A> extends CompressorHolder implements MapDecoder
      * @param value   The default value to use if a decoding error occurs and no partial result is present.
      * @return A map codec that returns the default value from its decode method if decoding returns an error.
      */
-    public MapCodec<A> withDefault(final UnaryOperator<String> onError, final A value) {
+    public MapCodec<A> orElse(final UnaryOperator<String> onError, final A value) {
         return mapResult(new ResultFunction<A>() {
             @Override
             public <T> DataResult<A> apply(final DynamicOps<T> ops, final MapLike<T> input, final DataResult<A> a) {
@@ -418,7 +418,7 @@ public abstract class MapCodec<A> extends CompressorHolder implements MapDecoder
 
             @Override
             public String toString() {
-                return "WithDefault[" + onError + " " + value + "]";
+                return "OrElse[" + onError + " " + value + "]";
             }
         });
     }
@@ -431,8 +431,8 @@ public abstract class MapCodec<A> extends CompressorHolder implements MapDecoder
      * @param value   A supplier of the default value to use if a decoding error occurs and no partial result is present.
      * @return A map codec that returns the default value from its decode method if decoding returns an error.
      */
-    public MapCodec<A> withDefault(final Consumer<String> onError, final Supplier<? extends A> value) {
-        return withDefault(DataFixUtils.consumerToFunction(onError), value);
+    public MapCodec<A> orElseGet(final Consumer<String> onError, final Supplier<? extends A> value) {
+        return orElseGet(DataFixUtils.consumerToFunction(onError), value);
     }
 
     /**
@@ -443,7 +443,7 @@ public abstract class MapCodec<A> extends CompressorHolder implements MapDecoder
      * @param value   A supplier of default value to use if a decoding error occurs and no partial result is present.
      * @return A map codec that returns the default value from its decode method if decoding returns an error.
      */
-    public MapCodec<A> withDefault(final UnaryOperator<String> onError, final Supplier<? extends A> value) {
+    public MapCodec<A> orElseGet(final UnaryOperator<String> onError, final Supplier<? extends A> value) {
         return mapResult(new ResultFunction<A>() {
             @Override
             public <T> DataResult<A> apply(final DynamicOps<T> ops, final MapLike<T> input, final DataResult<A> a) {
@@ -457,7 +457,7 @@ public abstract class MapCodec<A> extends CompressorHolder implements MapDecoder
 
             @Override
             public String toString() {
-                return "WithDefault[" + onError + " " + value.get() + "]";
+                return "OrElseGet[" + onError + " " + value.get() + "]";
             }
         });
     }
@@ -469,7 +469,7 @@ public abstract class MapCodec<A> extends CompressorHolder implements MapDecoder
      * @param value The default value to use if a decoding error occurs and no partial result is present.
      * @return A map codec that returns the default value from its decode method if decoding returns an error.
      */
-    public MapCodec<A> withDefault(final A value) {
+    public MapCodec<A> orElse(final A value) {
         return mapResult(new ResultFunction<A>() {
             @Override
             public <T> DataResult<A> apply(final DynamicOps<T> ops, final MapLike<T> input, final DataResult<A> a) {
@@ -483,7 +483,7 @@ public abstract class MapCodec<A> extends CompressorHolder implements MapDecoder
 
             @Override
             public String toString() {
-                return "WithDefault[" + value + "]";
+                return "OrElse[" + value + "]";
             }
         });
     }
@@ -495,7 +495,7 @@ public abstract class MapCodec<A> extends CompressorHolder implements MapDecoder
      * @param value A supplier of the default value to use if a decoding error occurs and no partial result is present.
      * @return A map codec that returns the default value from its decode method if decoding returns an error.
      */
-    public MapCodec<A> withDefault(final Supplier<? extends A> value) {
+    public MapCodec<A> orElseGet(final Supplier<? extends A> value) {
         return mapResult(new ResultFunction<A>() {
             @Override
             public <T> DataResult<A> apply(final DynamicOps<T> ops, final MapLike<T> input, final DataResult<A> a) {
@@ -509,7 +509,27 @@ public abstract class MapCodec<A> extends CompressorHolder implements MapDecoder
 
             @Override
             public String toString() {
-                return "WithDefault[" + value.get() + "]";
+                return "OrElseGet[" + value.get() + "]";
+            }
+        });
+    }
+
+    public MapCodec<A> setPartial(final Supplier<A> value) {
+        return mapResult(new ResultFunction<A>() {
+            @Override
+            public <T> DataResult<A> apply(final DynamicOps<T> ops, final MapLike<T> input, final DataResult<A> a) {
+                return a.setPartial(value);
+            }
+
+            @Override
+            public <T> RecordBuilder<T> coApply(final DynamicOps<T> ops, final A input, final RecordBuilder<T> t) {
+                return t;
+            }
+
+            @Override
+            public String toString() {
+                // FIXME: toString needs to be lazy everywhere, otherwise suppliers get resolved too early
+                return "SetPartial[" + value + "]";
             }
         });
     }
@@ -522,7 +542,7 @@ public abstract class MapCodec<A> extends CompressorHolder implements MapDecoder
      * @param <A>          The type of object the returned map codec operates on.
      * @return A map codec that always encodes and decodes the given value.
      */
-    static <A> MapCodec<A> unit(final A defaultValue) {
+    public static <A> MapCodec<A> unit(final A defaultValue) {
         return unit(() -> defaultValue);
     }
 
@@ -535,7 +555,7 @@ public abstract class MapCodec<A> extends CompressorHolder implements MapDecoder
      * @return A map codec that always encodes and decodes the given value.
      * @see #unit(Object)
      */
-    static <A> MapCodec<A> unit(final Supplier<A> defaultValue) {
+    public static <A> MapCodec<A> unit(final Supplier<A> defaultValue) {
         return MapCodec.of(Encoder.empty(), Decoder.unit(defaultValue));
     }
 }

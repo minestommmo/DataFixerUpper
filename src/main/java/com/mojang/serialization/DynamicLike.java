@@ -278,7 +278,6 @@ public abstract class DynamicLike<T> {
      * @return A {@link DataResult} containing the result value.
      * @implSpec This implementation calls {@link #asMapOpt()}, then performs a reduction operation on the elements
      * of the returned stream.
-     * @see DynamicOps#readMap(Object, DataResult, Function3)
      * @see Stream#reduce(Object, java.util.function.BinaryOperator)
      */
     public <R> DataResult<R> readMap(final DataResult<R> empty, final Function3<R, Dynamic<T>, Dynamic<T>, DataResult<R>> combiner) {
