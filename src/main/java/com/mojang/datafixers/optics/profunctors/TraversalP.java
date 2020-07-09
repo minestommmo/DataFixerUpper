@@ -14,15 +14,61 @@ import com.mojang.datafixers.optics.Wander;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 
+/**
+ * The {@link Profunctor} type class for {@link com.mojang.datafixers.optics.Traversal} optics. This type extends
+ * {@link AffineP} with the method {@link #wander(Wander, App2)}, which applies a given {@link Wander} transformation
+ * to the input.
+ *
+ * @param <P>  The type of transformation.
+ * @param <Mu> The witness type for this profunctor.
+ * @dfu.shape %.Type. %0
+ */
 public interface TraversalP<P extends K2, Mu extends TraversalP.Mu> extends AffineP<P, Mu>/*, Monoidal<P, Mu>*/ {
+    /**
+     * Thunk method that casts an applied {@link TraversalP.Mu} to a {@link TraversalP}.
+     *
+     * @param proofBox The boxed {@link TraversalP}.
+     * @param <P>      The type of transformation.
+     * @param <Proof>  The witness type of the traversal profunctor.
+     * @return The unboxed {@link TraversalP}.
+     */
     static <P extends K2, Proof extends TraversalP.Mu> TraversalP<P, Proof> unbox(final App<Proof, P> proofBox) {
         return (TraversalP<P, Proof>) proofBox;
     }
 
+    /**
+     * The witness type for {@link TraversalP}.
+     *
+     * @dfu.shape %.Mu. %^1
+     */
     public interface Mu extends AffineP.Mu/*, Monoidal.Mu*/ {
         TypeToken<Mu> TYPE_TOKEN = new TypeToken<Mu>() {};
     }
 
+//    /**   #wander is the generalization of this
+//     * Takes the given {@link Applicative}-effectful function over the field types and produces an effectful function
+//     * over the object types. The returned function traverses the structure {@code S}, applies the transformation to
+//     * each field in {@code S}, and combines the resulting effects into a single effect containing the transformed
+//     * object {@code T}.
+
+    /**
+     * Takes an operation defined by {@link Wander} and a transformation between field types, and produces a
+     * transformation between object types.
+     *
+     * <p>The returned transformation should accept an object {@code S}, extract a field {@code A}, apply the given input,
+     * and return the resulting {@code B} via an output object {@code T}, all in the context of some effectful computation
+     * defined by the {@code wander}.
+     *
+     * @param wander A mapping from effectful functions on the field types to effectful functions on the object types.
+     * @param input  A (non-effectful) transformation between object types.
+     * @param <S>    The input object type.
+     * @param <T>    The output object type.
+     * @param <A>    The input field type.
+     * @param <B>    The output field type.
+     * @return A transformation between object types.
+     * @see Wander
+     * @see Traversable
+     */
     <S, T, A, B> App2<P, S, T> wander(final Wander<S, T, A, B> wander, final App2<P, A, B> input);
 
     /*default <S, T, A, B> App2<P, S, T> wander(final Wander<S, T, A, B> wander, final App2<P, A, B> input) {
@@ -43,6 +89,21 @@ public interface TraversalP<P extends K2, Mu extends TraversalP.Mu> extends Affi
         return traverse(Traversable.unbox(proof), input);
     }*/
 
+    /**
+     * Takes a {@link Traversable} instance and some input transformation, and produces an output transformation
+     * between the effects defined by the traversable instance.
+     *
+     * <p>This is a specialization of {@link #wander(Wander, App2)} where {@code S' = T<A>} and {@code T' = T<B>}.
+     *
+     * @param traversable A {@link Traversable} instance for {@code T}.
+     * @param input       A transformation between field types.
+     * @param <T>         The traversable type.
+     * @param <A>         The input field type.
+     * @param <B>         The output field type.
+     * @return A transformation between effects of the field types.
+     * @implSpec The default implementation calls {@link #wander(Wander, App2)} with a {@link Wander} value that uses
+     * the given {@link Traversable} to traverse inputs.
+     */
     default <T extends K1, A, B> App2<P, App<T, A>, App<T, B>> traverse(final Traversable<T, ?> traversable, final App2<P, A, B> input) {
         return wander(new Wander<App<T, A>, App<T, B>, A, B>() {
             @Override
