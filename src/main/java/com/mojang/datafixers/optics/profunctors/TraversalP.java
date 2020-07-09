@@ -45,12 +45,6 @@ public interface TraversalP<P extends K2, Mu extends TraversalP.Mu> extends Affi
         TypeToken<Mu> TYPE_TOKEN = new TypeToken<Mu>() {};
     }
 
-//    /**   #wander is the generalization of this
-//     * Takes the given {@link Applicative}-effectful function over the field types and produces an effectful function
-//     * over the object types. The returned function traverses the structure {@code S}, applies the transformation to
-//     * each field in {@code S}, and combines the resulting effects into a single effect containing the transformed
-//     * object {@code T}.
-
     /**
      * Takes an operation defined by {@link Wander} and a transformation between field types, and produces a
      * transformation between object types.
