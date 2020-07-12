@@ -117,6 +117,9 @@ public interface TraversalP<P extends K2, Mu extends TraversalP.Mu> extends Affi
         return dimap(traverse(new Either.Instance<>(), input), box -> box, Either::unbox);
     }
 
+    /**
+     * Converts this profunctor into a {@link FunctorProfunctor} that distributes {@link Traversable} functors.
+     */
     default FunctorProfunctor<Traversable.Mu, P, FunctorProfunctor.Mu<Traversable.Mu>> toFP3() {
         return new FunctorProfunctor<Traversable.Mu, P, FunctorProfunctor.Mu<Traversable.Mu>>() {
             @Override

@@ -14,7 +14,10 @@ import java.util.function.Function;
 
 /**
  * A traversal is an optic that implements a structure-preserving transformation for (i.e. traverses over) some field
- * of an object. The operation performed by traversals is analogous to {@link com.mojang.datafixers.kinds.Traversable},
+ * of an object. It provides functionality to traverse over some fields of a structure and to transform those fields
+ * in the context of an effect.
+ *
+ * <p>The operation performed by traversals is analogous to {@link com.mojang.datafixers.kinds.Traversable},
  * which defines a structure-preserving transformation in the context of an effectful transformation.
  *
  * @param <S> The input object type.
