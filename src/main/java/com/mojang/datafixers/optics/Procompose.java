@@ -10,14 +10,54 @@ import com.mojang.datafixers.optics.profunctors.Profunctor;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * A composition of {@linkplain Profunctor profunctors}. Where a profunctor represents a transformation from one
+ * type to another, a {@link Procompose} represents the composition of these transformations. This is analogous
+ * to function composition, but for a general profunctor.
+ *
+ * <p>A {@code Procompose<F, G, A, B, C>} is analogous to a transformation {@code F} from {@code A} to {@code C}
+ * followed by a transformation {@code G} from {@code C} to {@code B}.
+ *
+ * @param <F> The witness type of the first transformation.
+ * @param <G> The witness type of the second transformation.
+ * @param <A> The input type.
+ * @param <B> The output type.
+ * @param <C> The intermediate type.
+ * @dfu.shape %.Type.[%a0,2,4;,%a1,4,3;]
+ * @see Profunctor
+ * @see Function#compose(Function)
+ */
 public final class Procompose<F extends K2, G extends K2, A, B, C> implements App2<Procompose.Mu<F, G>, A, B> {
+    /**
+     * Constructs a new {@link Procompose} that composes the given profunctors.
+     *
+     * @param first  The first profunctor.
+     * @param second The second profunctor.
+     */
     public Procompose(final Supplier<App2<F, A, C>> first, final App2<G, C, B> second) {
         this.first = first;
         this.second = second;
     }
 
+    /**
+     * The witness type of {@link Procompose}.
+     *
+     * @param <F> The type of the profunctor applied first.
+     * @param <G> The type of the profunctor applied second.
+     * @dfu.shape %.Mu.[%a0,^1,?C;,%a1,?C,^2;]
+     */
     public static final class Mu<F extends K2, G extends K2> implements K2 {}
 
+    /**
+     * Casts an applied {@link Procompose.Mu} to a {@link Procompose}.
+     *
+     * @param box The boxed {@link Procompose}.
+     * @param <F> The type of the profunctor applied first.
+     * @param <G> The type of the profunctor applied second.
+     * @param <A> The input type.
+     * @param <B> The output type.
+     * @return The unboxed {@link Procompose}.
+     */
     public static <F extends K2, G extends K2, A, B> Procompose<F, G, A, B, ?> unbox(final App2<Mu<F, G>, A, B> box) {
         return (Procompose<F, G, A, B, ?>) box;
     }
@@ -25,6 +65,12 @@ public final class Procompose<F extends K2, G extends K2, A, B, C> implements Ap
     private final Supplier<App2<F, A, C>> first;
     private final App2<G, C, B> second;
 
+    /**
+     * The {@link Profunctor} type class instance for {@link Procompose}.
+     *
+     * @param <F> The type of the profunctor applied first.
+     * @param <G> The type of the profunctor applied second.
+     */
     static final class ProfunctorInstance<F extends K2, G extends K2> implements Profunctor<Mu<F, G>, Profunctor.Mu> {
         private final Profunctor<F, Mu> p1;
         private final Profunctor<G, Mu> p2;
@@ -44,10 +90,16 @@ public final class Procompose<F extends K2, G extends K2, A, B, C> implements Ap
         }
     }
 
+    /**
+     * Returns the profunctor applied first.
+     */
     public Supplier<App2<F, A, C>> first() {
         return first;
     }
 
+    /**
+     * Returns the profunctor applied second.
+     */
     public App2<G, C, B> second() {
         return second;
     }
