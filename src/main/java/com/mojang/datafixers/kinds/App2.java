@@ -13,7 +13,7 @@ package com.mojang.datafixers.kinds;
  * @param <F> The <em>type witness</em> representing the type constructor. This is often a nested {@code Mu} empty class.
  * @param <A> The first type applied to the type constructor.
  * @param <B> The second type applied to the type constructor.
- * @dfu.shape applied
+ * @dfu.shape %(0,1,2)
  * @see K2
  * @see App
  */

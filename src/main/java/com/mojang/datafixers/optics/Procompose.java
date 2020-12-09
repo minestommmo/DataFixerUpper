@@ -23,7 +23,7 @@ import java.util.function.Supplier;
  * @param <A> The input type.
  * @param <B> The output type.
  * @param <C> The intermediate type.
- * @dfu.shape %.Type.[%a0,2,4;,%a1,4,3;]
+ * @dfu.shape %.Type.[%(0,2,4),%(1,4,3)]
  * @see Profunctor
  * @see Function#compose(Function)
  */
@@ -44,7 +44,7 @@ public final class Procompose<F extends K2, G extends K2, A, B, C> implements Ap
      *
      * @param <F> The type of the profunctor applied first.
      * @param <G> The type of the profunctor applied second.
-     * @dfu.shape %.Mu.[%a0,^1,?C;,%a1,?C,^2;]
+     * @dfu.shape %.Mu.[%(0,^1,'?C'),%(1,'?C',^2)]
      */
     public static final class Mu<F extends K2, G extends K2> implements K2 {}
 
