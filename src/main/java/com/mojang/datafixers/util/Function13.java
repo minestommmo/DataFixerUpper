@@ -20,7 +20,7 @@ import java.util.function.Function;
  * @param <T12> The twelfth parameter type.
  * @param <T13> The thirteenth parameter type.
  * @param <R>   The return value.
- * @dfu.shape "(%0,%1,%2,%3,%4,%5,%6,%7,%8,%9,%10,%11,%12 %.->. %13"
+ * @dfu.shape "(%0,%1,%2,%3,%4,%5,%6,%7,%8,%9,%10,%11,%12) %.->. %13"
  */
 public interface Function13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, R> {
     /**
