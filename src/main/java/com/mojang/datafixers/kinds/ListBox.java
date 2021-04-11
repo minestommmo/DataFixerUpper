@@ -20,6 +20,7 @@ public final class ListBox<T> implements App<ListBox.Mu, T> {
      * The witness type of {@link ListBox}.
      *
      * @dfu.shape %.Mu.[%^1]
+     * @dfu.hidden
      */
     public static final class Mu implements K1 {}
 
@@ -29,6 +30,7 @@ public final class ListBox<T> implements App<ListBox.Mu, T> {
      * @param box The boxed {@link ListBox}.
      * @param <T> The type of values contained in the list.
      * @return The unboxed list.
+     * @dfu.hidden
      */
     public static <T> List<T> unbox(final App<Mu, T> box) {
         return ((ListBox<T>) box).value;
@@ -95,6 +97,7 @@ public final class ListBox<T> implements App<ListBox.Mu, T> {
          * The witness type of {@link Instance}.
          *
          * @dfu.shape instance %^1
+         * @dfu.hidden
          */
         public static final class Mu implements Traversable.Mu {}
 

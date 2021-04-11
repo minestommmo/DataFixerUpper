@@ -31,6 +31,7 @@ public interface TraversalP<P extends K2, Mu extends TraversalP.Mu> extends Affi
      * @param <P>      The type of transformation.
      * @param <Proof>  The witness type of the traversal profunctor.
      * @return The unboxed {@link TraversalP}.
+     * @dfu.hidden
      */
     static <P extends K2, Proof extends TraversalP.Mu> TraversalP<P, Proof> unbox(final App<Proof, P> proofBox) {
         return (TraversalP<P, Proof>) proofBox;
@@ -40,6 +41,7 @@ public interface TraversalP<P extends K2, Mu extends TraversalP.Mu> extends Affi
      * The witness type for {@link TraversalP}.
      *
      * @dfu.shape %.Mu. %^1
+     * @dfu.hidden
      */
     public interface Mu extends AffineP.Mu/*, Monoidal.Mu*/ {
         TypeToken<Mu> TYPE_TOKEN = new TypeToken<Mu>() {};

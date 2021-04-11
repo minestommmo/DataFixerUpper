@@ -27,11 +27,13 @@ public class DataResult<R> implements App<DataResult.Mu, R> {
      * A marker interface representing the type constructor {@link DataResult}.
      *
      * @dfu.shape %.Mu.[%^1]
+     * @dfu.hidden
      */
     public static final class Mu implements K1 {}
 
     /**
      * Thunk method to cast the applied {@link DataResult} type constructor to the type {@link DataResult}.
+     * @dfu.hidden
      */
     public static <R> DataResult<R> unbox(final App<Mu, R> box) {
         return (DataResult<R>) box;
@@ -552,6 +554,7 @@ public class DataResult<R> implements App<DataResult.Mu, R> {
          * A marker class representing the meta-type constructor {@link DataResult.Instance}.
          *
          * @dfu.shape instance %^1
+         * @dfu.hidden
          */
         public static final class Mu implements Applicative.Mu {}
 

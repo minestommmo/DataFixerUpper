@@ -28,6 +28,7 @@ public interface Profunctor<P extends K2, Mu extends Profunctor.Mu> extends Kind
      * The witness type of a {@link Profunctor}.
      *
      * @dfu.shape %.Mu. %^1
+     * @dfu.hidden
      * @see #TYPE_TOKEN
      */
     interface Mu extends Kind2.Mu {
@@ -44,6 +45,7 @@ public interface Profunctor<P extends K2, Mu extends Profunctor.Mu> extends Kind
      * @param <P>      The container type.
      * @param <Proof>  The witness type.
      * @return The unboxed profunctor.
+     * @dfu.hidden
      */
     static <P extends K2, Proof extends Profunctor.Mu> Profunctor<P, Proof> unbox(final App<Proof, P> proofBox) {
         return (Profunctor<P, Proof>) proofBox;

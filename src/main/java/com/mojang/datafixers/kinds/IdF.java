@@ -22,6 +22,7 @@ public final class IdF<A> implements App<IdF.Mu, A> {
      * The witness type of {@link IdF}.
      *
      * @dfu.shape %.Mu.[%^1]
+     * @dfu.hidden
      */
     public static final class Mu implements K1 {}
 
@@ -80,6 +81,7 @@ public final class IdF<A> implements App<IdF.Mu, A> {
          * The witness type of {@code IdF.Instance}.
          *
          * @dfu.shape instance %^1
+         * @dfu.hidden
          */
         public static final class Mu implements Functor.Mu, Applicative.Mu {}
 

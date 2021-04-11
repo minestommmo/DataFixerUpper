@@ -34,6 +34,7 @@ public interface Traversal<S, T, A, B> extends Wander<S, T, A, B>, App2<Traversa
      * @param <A> The input field type.
      * @param <B> The input object type.
      * @dfu.shape %.Mu.[%^1::%0,%^2::%1]
+     * @dfu.hidden
      */
     final class Mu<A, B> implements K2 {}
 
@@ -46,6 +47,7 @@ public interface Traversal<S, T, A, B> extends Wander<S, T, A, B>, App2<Traversa
      * @param <A> The input field type.
      * @param <B> The output field type.
      * @return The unboxed {@link Traversal}.
+     * @dfu.hidden
      */
     static <S, T, A, B> Traversal<S, T, A, B> unbox(final App2<Mu<A, B>, S, T> box) {
         return (Traversal<S, T, A, B>) box;

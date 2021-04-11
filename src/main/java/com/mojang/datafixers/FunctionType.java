@@ -37,6 +37,7 @@ public interface FunctionType<A, B> extends Function<A, B>, App2<FunctionType.Mu
      * The witness type for {@link FunctionType}.
      *
      * @dfu.shape "(%^1) %.->. %^2"
+     * @dfu.hidden
      */
     final class Mu implements K2 {}
 
@@ -45,6 +46,7 @@ public interface FunctionType<A, B> extends Function<A, B>, App2<FunctionType.Mu
      *
      * @param <A> The input type.
      * @dfu.shape "(%0) %.->. %^1"
+     * @dfu.hidden
      */
     final class ReaderMu<A> implements K1 {}
 
@@ -67,6 +69,7 @@ public interface FunctionType<A, B> extends Function<A, B>, App2<FunctionType.Mu
      * @param <A> The function input type.
      * @param <B> The function output type.
      * @return The casted function.
+     * @dfu.hidden
      */
     static <A, B> Function<A, B> unbox(final App2<Mu, A, B> box) {
         return (FunctionType<A, B>) box;
@@ -79,6 +82,7 @@ public interface FunctionType<A, B> extends Function<A, B>, App2<FunctionType.Mu
      * @param <A> The function input type.
      * @param <B> The function output type.
      * @return The casted function.
+     * @dfu.hidden
      */
     static <A, B> Function<A, B> unbox(final App<ReaderMu<A>, B> box) {
         return (FunctionType<A, B>) box;
@@ -95,6 +99,9 @@ public interface FunctionType<A, B> extends Function<A, B>, App2<FunctionType.Mu
     B apply(@Nonnull A a);
 
     final class ReaderInstance<R> implements Representable<ReaderMu<R>, R, ReaderInstance.Mu<R>> {
+        /**
+         * @dfu.hidden
+         */
         public static final class Mu<A> implements Representable.Mu {}
 
         @Override
@@ -116,6 +123,9 @@ public interface FunctionType<A, B> extends Function<A, B>, App2<FunctionType.Mu
     enum Instance implements TraversalP<Mu, Instance.Mu>, MonoidProfunctor<Mu, Instance.Mu>, Mapping<Mu, Instance.Mu>, Monoidal<Mu, Instance.Mu>, App<Instance.Mu, Mu> {
         INSTANCE;
 
+        /**
+         * @dfu.hidden
+         */
         public static final class Mu implements TraversalP.Mu, MonoidProfunctor.Mu, Mapping.Mu, Monoidal.Mu {
             public static final TypeToken<Mu> TYPE_TOKEN = new TypeToken<Mu>() {};
         }

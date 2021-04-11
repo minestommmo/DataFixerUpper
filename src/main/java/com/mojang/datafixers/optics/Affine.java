@@ -59,6 +59,7 @@ public interface Affine<S, T, A, B> extends App2<Affine.Mu<A, B>, S, T>, Optic<A
      * @param <A> The input field type.
      * @param <B> The output field type.
      * @dfu.shape %.Mu.[%^1::%0,%^2::%1]
+     * @dfu.hidden
      */
     final class Mu<A, B> implements K2 {}
 
@@ -71,6 +72,7 @@ public interface Affine<S, T, A, B> extends App2<Affine.Mu<A, B>, S, T>, Optic<A
      * @param <A> The input field type.
      * @param <B> The output field type.
      * @return The unboxed affine.
+     * @dfu.hidden
      */
     static <S, T, A, B> Affine<S, T, A, B> unbox(final App2<Mu<A, B>, S, T> box) {
         return (Affine<S, T, A, B>) box;

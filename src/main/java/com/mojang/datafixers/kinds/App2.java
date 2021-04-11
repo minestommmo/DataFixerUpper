@@ -14,6 +14,7 @@ package com.mojang.datafixers.kinds;
  * @param <A> The first type applied to the type constructor.
  * @param <B> The second type applied to the type constructor.
  * @dfu.shape %(0,1,2)
+ * @dfu.hidden
  * @see K2
  * @see App
  */

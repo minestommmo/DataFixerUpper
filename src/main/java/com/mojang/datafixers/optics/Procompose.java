@@ -45,6 +45,7 @@ public final class Procompose<F extends K2, G extends K2, A, B, C> implements Ap
      * @param <F> The type of the profunctor applied first.
      * @param <G> The type of the profunctor applied second.
      * @dfu.shape %.Mu.[%(0,^1,'?C'),%(1,'?C',^2)]
+     * @dfu.hidden
      */
     public static final class Mu<F extends K2, G extends K2> implements K2 {}
 
@@ -57,6 +58,7 @@ public final class Procompose<F extends K2, G extends K2, A, B, C> implements Ap
      * @param <A> The input type.
      * @param <B> The output type.
      * @return The unboxed {@link Procompose}.
+     * @dfu.hidden
      */
     public static <F extends K2, G extends K2, A, B> Procompose<F, G, A, B, ?> unbox(final App2<Mu<F, G>, A, B> box) {
         return (Procompose<F, G, A, B, ?>) box;

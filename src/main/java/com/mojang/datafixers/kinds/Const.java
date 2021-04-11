@@ -27,6 +27,7 @@ public final class Const<C, T> implements App<Const.Mu<C>, T> {
      *
      * @param <C> The type of stored values.
      * @dfu.shape %.Mu.[%0,%^1]
+     * @dfu.hidden
      */
     public static final class Mu<C> implements K1 {}
 
@@ -73,6 +74,7 @@ public final class Const<C, T> implements App<Const.Mu<C>, T> {
          *
          * @param <C> The type of value stored in the const objects.
          * @dfu.shape instance %^1
+         * @dfu.hidden
          */
         public static final class Mu<C> implements Applicative.Mu {}
 

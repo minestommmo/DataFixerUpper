@@ -31,6 +31,7 @@ public interface FunctorProfunctor<T extends K1, P extends K2, Mu extends Functo
      * @param <P>      The transformation type.
      * @param <Mu>     The witness type for the profunctor.
      * @return The unboxed {@link FunctorProfunctor}.
+     * @dfu.hidden
      */
     static <T extends K1, P extends K2, Mu extends FunctorProfunctor.Mu<T>> FunctorProfunctor<T, P, Mu> unbox(final App<Mu, P> proofBox) {
         return (FunctorProfunctor<T, P, Mu>) proofBox;
@@ -40,6 +41,7 @@ public interface FunctorProfunctor<T extends K1, P extends K2, Mu extends Functo
      * The witness type for {@link FunctorProfunctor}.
      *
      * @dfu.shape %.Mu.[%0] %^1
+     * @dfu.hidden
      */
     interface Mu<T extends K1> extends Kind2.Mu {}
 

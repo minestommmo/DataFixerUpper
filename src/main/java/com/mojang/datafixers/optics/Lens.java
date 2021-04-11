@@ -53,6 +53,7 @@ public interface Lens<S, T, A, B> extends App2<Lens.Mu<A, B>, S, T>, Optic<Carte
      * @param <A> The input field type.
      * @param <B> The output field type.
      * @dfu.shape %.Mu.[%^1::%0,%^2::%1]
+     * @dfu.hidden
      */
     final class Mu<A, B> implements K2 {}
 
@@ -62,6 +63,7 @@ public interface Lens<S, T, A, B> extends App2<Lens.Mu<A, B>, S, T>, Optic<Carte
      * @param <S> The input object type.
      * @param <T> The output object type.
      * @dfu.shape %.Mu.[%0::%^2,%1::%^1]
+     * @dfu.hidden
      */
     final class Mu2<S, T> implements K2 {}
 
@@ -74,6 +76,7 @@ public interface Lens<S, T, A, B> extends App2<Lens.Mu<A, B>, S, T>, Optic<Carte
      * @param <A> The input field type.
      * @param <B> The output field type.
      * @return The unboxed lens.
+     * @dfu.hidden
      */
     static <S, T, A, B> Lens<S, T, A, B> unbox(final App2<Mu<A, B>, S, T> box) {
         return (Lens<S, T, A, B>) box;
@@ -88,6 +91,7 @@ public interface Lens<S, T, A, B> extends App2<Lens.Mu<A, B>, S, T>, Optic<Carte
      * @param <A> The input field type.
      * @param <B> The output field type.
      * @return The unboxed lens.
+     * @dfu.hidden
      */
     static <S, T, A, B> Lens<S, T, A, B> unbox2(final App2<Mu2<S, T>, B, A> box) {
         return ((Box<S, T, A, B>) box).lens;
@@ -104,6 +108,7 @@ public interface Lens<S, T, A, B> extends App2<Lens.Mu<A, B>, S, T>, Optic<Carte
      * @return The boxed lens.
      * @apiNote This method is necessary because {@link Lens} cannot extend two different instantiations of
      * {@link App2}.
+     * @dfu.hidden
      */
     static <S, T, A, B> App2<Mu2<S, T>, B, A> box(final Lens<S, T, A, B> lens) {
         return new Box<>(lens);
@@ -118,6 +123,7 @@ public interface Lens<S, T, A, B> extends App2<Lens.Mu<A, B>, S, T>, Optic<Carte
      * @param <A> The input field type.
      * @param <B> The output field type.
      * @dfu.shape %.Type.[%0::%2,%1::%3]
+     * @dfu.hidden
      */
     final class Box<S, T, A, B> implements App2<Mu2<S, T>, B, A> {
         private final Lens<S, T, A, B> lens;

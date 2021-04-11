@@ -50,6 +50,7 @@ public interface Prism<S, T, A, B> extends App2<Prism.Mu<A, B>, S, T>, Optic<Coc
      * @param <A> The input field type.
      * @param <B> The output field type.
      * @dfu.shape %.Mu.[%^1::%0,%^2::%1]
+     * @dfu.hidden
      */
     final class Mu<A, B> implements K2 {}
 
@@ -62,6 +63,7 @@ public interface Prism<S, T, A, B> extends App2<Prism.Mu<A, B>, S, T>, Optic<Coc
      * @param <A> The input field type.
      * @param <B> The output field type.
      * @return The unboxed prism.
+     * @dfu.hidden
      */
     static <S, T, A, B> Prism<S, T, A, B> unbox(final App2<Mu<A, B>, S, T> box) {
         return (Prism<S, T, A, B>) box;

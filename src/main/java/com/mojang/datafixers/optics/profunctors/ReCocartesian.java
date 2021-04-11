@@ -26,6 +26,7 @@ public interface ReCocartesian<P extends K2, Mu extends ReCocartesian.Mu> extend
      * @param <P>      The transformation type.
      * @param <Proof>  The witness type for the profunctor.
      * @return The unboxed {@link ReCocartesian}.
+     * @dfu.hidden
      */
     static <P extends K2, Proof extends ReCocartesian.Mu> ReCocartesian<P, Proof> unbox(final App<Proof, P> proofBox) {
         return (ReCocartesian<P, Proof>) proofBox;
@@ -35,6 +36,7 @@ public interface ReCocartesian<P extends K2, Mu extends ReCocartesian.Mu> extend
      * The witness type for {@link ReCocartesian}.
      *
      * @dfu.shape %.Mu. %^1
+     * @dfu.hidden
      */
     interface Mu extends Profunctor.Mu {}
 

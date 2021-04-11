@@ -21,6 +21,7 @@ public interface Representable<T extends K1, C, Mu extends Representable.Mu> ext
      * @param <C>      The function input type.
      * @param <Mu>     The witness type of the given functor.
      * @return The unboxed {@link Representable}.
+     * @dfu.hidden
      */
     static <F extends K1, C, Mu extends Representable.Mu> Representable<F, C, Mu> unbox(final App<Mu, F> proofBox) {
         return (Representable<F, C, Mu>) proofBox;
@@ -30,6 +31,7 @@ public interface Representable<T extends K1, C, Mu extends Representable.Mu> ext
      * The witness type of a {@link Representable}.
      *
      * @dfu.shape %.Mu. %^1
+     * @dfu.hidden
      */
     interface Mu extends Functor.Mu {}
 

@@ -86,6 +86,7 @@ public interface Applicative<F extends K1, Mu extends Applicative.Mu> extends Fu
      * @param <Mu>     The witness type of the applicative functor.
      * @return The unboxed applicative functor.
      * @throws ClassCastException If {@code proofBox} is not an applicative functor.
+     * @dfu.hidden
      */
     static <F extends K1, Mu extends Applicative.Mu> Applicative<F, Mu> unbox(final App<Mu, F> proofBox) {
         return (Applicative<F, Mu>) proofBox;
@@ -95,6 +96,7 @@ public interface Applicative<F extends K1, Mu extends Applicative.Mu> extends Fu
      * The witness type of an applicative functor.
      *
      * @dfu.shape %.Mu.% %^1
+     * @dfu.hidden
      */
     interface Mu extends Functor.Mu {}
 

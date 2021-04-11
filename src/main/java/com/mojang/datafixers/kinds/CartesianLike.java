@@ -25,6 +25,7 @@ public interface CartesianLike<T extends K1, C, Mu extends CartesianLike.Mu> ext
      * @param <C>      A type contained in {@link F}.
      * @param <Mu>     The witness type of this functor.
      * @return The unboxed value.
+     * @dfu.hidden
      */
     static <F extends K1, C, Mu extends CartesianLike.Mu> CartesianLike<F, C, Mu> unbox(final App<Mu, F> proofBox) {
         return (CartesianLike<F, C, Mu>) proofBox;
@@ -34,6 +35,7 @@ public interface CartesianLike<T extends K1, C, Mu extends CartesianLike.Mu> ext
      * The witness type of {@link CartesianLike}.
      *
      * @dfu.shape %.Mu. %^1
+     * @dfu.hidden
      */
     interface Mu extends Functor.Mu, Traversable.Mu {}
 

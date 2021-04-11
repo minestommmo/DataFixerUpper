@@ -27,6 +27,7 @@ public interface Cocartesian<P extends K2, Mu extends Cocartesian.Mu> extends Pr
      * @param <P>      The transformation type.
      * @param <Proof>  The witness type for the profunctor.
      * @return The unboxed {@link Cocartesian}.
+     * @dfu.hidden
      */
     static <P extends K2, Proof extends Cocartesian.Mu> Cocartesian<P, Proof> unbox(final App<Proof, P> proofBox) {
         return (Cocartesian<P, Proof>) proofBox;
@@ -36,6 +37,7 @@ public interface Cocartesian<P extends K2, Mu extends Cocartesian.Mu> extends Pr
      * The witness type for {@link Cocartesian}.
      *
      * @dfu.shape %.Mu. %^1
+     * @dfu.hidden
      */
     interface Mu extends Profunctor.Mu {
         /**

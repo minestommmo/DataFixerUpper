@@ -26,6 +26,7 @@ public interface CocartesianLike<T extends K1, C, Mu extends CocartesianLike.Mu>
      * @param <C>      A type contained in {@link F}.
      * @param <Mu>     The witness type of this functor.
      * @return The unboxed value.
+     * @dfu.hidden
      */
     static <F extends K1, C, Mu extends CocartesianLike.Mu> CocartesianLike<F, C, Mu> unbox(final App<Mu, F> proofBox) {
         return (CocartesianLike<F, C, Mu>) proofBox;
@@ -35,6 +36,7 @@ public interface CocartesianLike<T extends K1, C, Mu extends CocartesianLike.Mu>
      * The witness type of {@link CocartesianLike}.
      *
      * @dfu.shape %.Mu. %^1
+     * @dfu.hidden
      */
     interface Mu extends Functor.Mu, Traversable.Mu {}
 

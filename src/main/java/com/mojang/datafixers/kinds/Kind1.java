@@ -27,6 +27,7 @@ public interface Kind1<F extends K1, Mu extends Kind1.Mu> extends App<Mu, F> {
      * @param <F>      The container type.
      * @param <Proof>  The witness type.
      * @return The casted {@link Kind1}.
+     * @dfu.hidden
      */
     static <F extends K1, Proof extends Kind1.Mu> Kind1<F, Proof> unbox(final App<Proof, F> proofBox) {
         return (Kind1<F, Proof>) proofBox;
@@ -36,6 +37,7 @@ public interface Kind1<F extends K1, Mu extends Kind1.Mu> extends App<Mu, F> {
      * The witness type of a {@link Kind1}.
      *
      * @dfu.shape %.Mu. %^1
+     * @dfu.hidden
      */
     interface Mu extends K1 {}
 

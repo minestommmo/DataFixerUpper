@@ -27,6 +27,7 @@ public interface Cartesian<P extends K2, Mu extends Cartesian.Mu> extends Profun
      * @param <P>      The transformation type.
      * @param <Proof>  The witness type for the profunctor.
      * @return The unboxed {@link Cartesian}.
+     * @dfu.hidden
      */
     static <P extends K2, Proof extends Cartesian.Mu> Cartesian<P, Proof> unbox(final App<Proof, P> proofBox) {
         return (Cartesian<P, Proof>) proofBox;
@@ -36,6 +37,7 @@ public interface Cartesian<P extends K2, Mu extends Cartesian.Mu> extends Profun
      * The witness type for {@link Cartesian}.
      *
      * @dfu.shape %.Mu. %^1
+     * @dfu.hidden
      */
     interface Mu extends Profunctor.Mu {
         /**

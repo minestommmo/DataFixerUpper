@@ -37,6 +37,7 @@ public interface Functor<F extends K1, Mu extends Functor.Mu> extends Kind1<F, M
      * @param <Mu>     The witness type of the functor.
      * @return The unboxed functor.
      * @throws ClassCastException If {@code proofBox} is not a functor.
+     * @dfu.hidden
      */
     static <F extends K1, Mu extends Functor.Mu> Functor<F, Mu> unbox(final App<Mu, F> proofBox) {
         return (Functor<F, Mu>) proofBox;
@@ -46,6 +47,7 @@ public interface Functor<F extends K1, Mu extends Functor.Mu> extends Kind1<F, M
      * The witness type of a functor.
      *
      * @dfu.shape %.Mu. %^1
+     * @dfu.hidden
      */
     interface Mu extends Kind1.Mu {}
 

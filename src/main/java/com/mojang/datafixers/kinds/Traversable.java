@@ -31,6 +31,7 @@ public interface Traversable<T extends K1, Mu extends Traversable.Mu> extends Fu
      * @param <F>      The container type.
      * @param <Mu>     The witness type.
      * @return The casted {@link Traversable}.
+     * @dfu.hidden
      */
     static <F extends K1, Mu extends Traversable.Mu> Traversable<F, Mu> unbox(final App<Mu, F> proofBox) {
         return (Traversable<F, Mu>) proofBox;
@@ -40,6 +41,7 @@ public interface Traversable<T extends K1, Mu extends Traversable.Mu> extends Fu
      * The witness type for {@link Traversable}.
      *
      * @dfu.shape %.Mu. %^1
+     * @dfu.hidden
      */
     interface Mu extends Functor.Mu {}
 

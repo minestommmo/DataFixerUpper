@@ -18,6 +18,7 @@ public interface AffineP<P extends K2, Mu extends AffineP.Mu> extends Cartesian<
      * The witness type for {@link AffineP}.
      *
      * @dfu.shape %.Mu. %^1
+     * @dfu.hidden
      */
     interface Mu extends Cartesian.Mu, Cocartesian.Mu {
         /**
