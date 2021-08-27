@@ -32,7 +32,8 @@ import java.util.function.Function;
  *         {@code set(b2, set(b1, s)) == set(b2, s)} - Setting twice is equivalent to setting once.
  *     </li>
  *     <li>
- *         {@code preview(update(b, s)) == Right(b)} - Previewing after setting yields the value used to set.
+ *         {@code preview(set(b, s)) == Right(b) | Left(s)} - Previewing after setting yields either the value used to
+ *         set or the original unset object.
  *     </li>
  *     <li>
  *         {@code set?(preview(s), s) == s} - Setting with a previewed value yields the original object.
