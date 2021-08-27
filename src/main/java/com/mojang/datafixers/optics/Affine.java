@@ -15,11 +15,12 @@ import com.mojang.datafixers.util.Pair;
 import java.util.function.Function;
 
 /**
- * An affine is an optic that provides access and modification to a single optional field. It provides functionality
- * to extract an optional value of the input field type {@code A} from the input object type {@code S} and to
- * combine the input {@code S} and the transformed field type {@code B} into the output object type {@code T}.
+ * An affine is an optic that provides access and modification to a single field of an algebraic data type.
+ * It provides functionality to extract the value of the input field type {@code A} from the input object type {@code S}
+ * and to combine the remainder of the input {@code S} and the transformed field type {@code B} into the output object
+ * type {@code T}.
  *
- * <p>The canonical example of an affine is retrieving and storing a value in a dynamic key-value store.
+ * <p>An affine can be thought of as a generalization of the {@link Lens} and {@link Prism} optics.
  *
  * <p>In order to be a <em>lawful affine</em>, the implementations of {@link #preview(Object)} and {@link #set(Object, Object)}
  * must satisfy certain requirements. Assume that the object types {@code S} and {@code T} are implicitly convertible
@@ -79,13 +80,11 @@ public interface Affine<S, T, A, B> extends App2<Affine.Mu<A, B>, S, T>, Optic<A
     }
 
     /**
-     * Extracts an optional value from the input object. Returns the straightforward transformation of the input
-     * object to the output object if the input field is not present.
-     *
-     * <p>The method is analogous to partial getter methods such as {@link java.util.Map#get(Object)}.
+     * Attempts to extract a value from the input object. Returns the residual transformation of the input
+     * object to the output object if the input is not of the variant which contains the field.
      *
      * @param s The input object.
-     * @return Either the extracted field value, or a value of the output object equivalent to the input.
+     * @return Either the extracted field value, or a corresponding residual value of the output object type.
      * @implSpec The implementation must, in conjunction with {@link #set(Object, Object)}, satisfy the affine laws
      * in order for this affine to be a <em>lawful affine</em>.
      */
@@ -107,7 +106,7 @@ public interface Affine<S, T, A, B> extends App2<Affine.Mu<A, B>, S, T>, Optic<A
      * Evaluates this affine to produce a function that, when given a transformation between field types, produces
      * a transformation between object types. The transformation {@linkplain #preview(Object) extracts} an optional
      * value from the input object, and either {@linkplain #set(Object, Object) sets} the output field with the
-     * transformed field value or returns the converted input object.
+     * transformed field value or returns the input converted to type {@link T} using a residual transformation.
      *
      * @param proof The {@link AffineP} type class instance for the transformation type.
      * @param <P>   The type of transformation.

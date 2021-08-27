@@ -51,7 +51,7 @@ public interface TraversalP<P extends K2, Mu extends TraversalP.Mu> extends Affi
      * Takes an operation defined by {@link Wander} and a transformation between field types, and produces a
      * transformation between object types.
      *
-     * <p>The returned transformation should accept an object {@code S}, extract a field {@code A}, apply the given input,
+     * <p>The returned transformation should accept an object {@code S}, extract fields {@code A}, apply the given input,
      * and return the resulting {@code B} via an output object {@code T}, all in the context of some effectful computation
      * defined by the {@code wander}.
      *

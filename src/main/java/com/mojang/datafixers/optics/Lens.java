@@ -13,11 +13,12 @@ import java.util.function.Function;
 
 /**
  * A lens is an optic the provides access and modification to a single field. It provides functionality
- * to extract a single value of the input field type {@code A} from the input object type {@code S} and
- * to combine the input {@code S} and the transformed field type {@code B} into the output object type {@code T}.
+ * to extract a single value of the input field type {@code A} from the input <em>product type</em> {@code S} and
+ * to combine the remaining input {@code S} and the transformed field type {@code B} into the output product
+ * type {@code T}.
  *
  * <p>The canonical example for using a lens is to extract and update a field of a {@code struct} type, using the
- * C meaning of {@code struct}.
+ * C language meaning of {@code struct}.
  *
  * <p>In order to be a <em>lawful lens</em>, the implementations of {@link #view(Object)} and {@link #update(Object, Object)}
  * must satisfy certain requirements. Assume that the object types {@code S} and {@code T} are implicitly convertible
@@ -154,9 +155,7 @@ public interface Lens<S, T, A, B> extends App2<Lens.Mu<A, B>, S, T>, Optic<Carte
      * Combines a value of the output field type with a value of the input object type to produce a combined value
      * of the output object type.
      *
-     * <p>This method is analogous to a "setter" in traditional object-oriented programming. Note that the given
-     * field {@code b} does not necessarily have to correspond with the straightforward transformation from the
-     * input object to the output object.
+     * <p>This method is analogous to a "setter" in traditional object-oriented programming.
      *
      * @param b A value of the output field type with which to update the output object.
      * @param s A value of the input object type to be converted to a value of the output object type.

@@ -12,12 +12,12 @@ import com.mojang.datafixers.util.Either;
 import java.util.function.Function;
 
 /**
- * A prism is an optic that provides pattern matching against and construction from a field. It provides functionality
- * to extract a value {@code A} from the input <em>sum type</em> {@code S} and to build an object of sum type {@code T}
- * from a derived value {@code B}.
+ * A prism is an optic that provides access to and construction from a variant field. It provides functionality
+ * to match against a variant {@code A} from the input <em>sum type</em> {@code S} and to build an object of sum type
+ * {@code T} from a derived value {@code B}.
  *
  * <p>The canonical example for using a prism is to extract and update a field of a tagged {@code union} type, using
- * the C meaning of {@code union}.
+ * the C language meaning of {@code union}.
  *
  * <p>In order to be a <em>lawful prism</em>, the implementations of {@link #match(Object)} and {@link #build(Object)}
  * must satisfy certain requirements. Assume that the object types {@code S} and {@code T} are implicitly convertible
@@ -70,16 +70,16 @@ public interface Prism<S, T, A, B> extends App2<Prism.Mu<A, B>, S, T>, Optic<Coc
     }
 
     /**
-     * Attempts to extract the input field from the input object. Returns the straightforward transformation of the
+     * Attempts to extract the input field from the input object. Returns the residual transformation of the
      * input object to the output object if the input field is not present.
      *
-     * <p>For example, say that the input object type is {@link com.mojang.serialization.DataResult} and the output
-     * object type is {@link java.util.Optional}. Calling {@code match} with the data result will return either the
-     * value present in the result (if a {@link com.mojang.serialization.DataResult} is a success), or an absent
-     * {@link java.util.Optional} (if the result is an error).
+     * <p>For example, say that the input object type is {@code Optional<A>} and the output
+     * object type is {@code Optional<B>}. Calling {@code match} with the data result will return
+     * either the value present in the result (if the input {@code Optional<A>} is present), or an absent
+     * {@code Optional<B>} (if the input optional is absent).
      *
      * @param s A value of the input object type from which to attempt to extract the input field value.
-     * @return Either the value of the input field, or a value of the output object type equivalent to the input.
+     * @return Either the value of the input field, or the corresponding residual value of the output object type.
      * @implSpec The implementation must, in conjunction with {@link #build(Object)}, satisfy the prism laws in order
      * for this prism to be a <em>lawful prism</em>.
      */
@@ -102,7 +102,7 @@ public interface Prism<S, T, A, B> extends App2<Prism.Mu<A, B>, S, T>, Optic<Coc
      * Evaluates this prism to produce a function that, when given a transformation between field types, produces a
      * transformation between object types. The transformation {@linkplain #match(Object) matches} the input object
      * against the input field, and either {@linkplain #build(Object) builds} an output object from the extracted
-     * value or returns the converted input.
+     * value or returns the input converted to type {@link T} using a residual transformation.
      *
      * @param proof The {@link Cocartesian} type class instance for the transformation type.
      * @return A function that takes a transformation between field types and produces a transformation between

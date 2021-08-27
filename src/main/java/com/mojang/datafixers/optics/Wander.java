@@ -9,7 +9,7 @@ import com.mojang.datafixers.kinds.K1;
 
 /**
  * A generalization of {@link com.mojang.datafixers.kinds.Traversable} for any object types, not just functors.
- * This interface is used in {@link Traversal} to implement optics that visit each field of a traversable structure.
+ * This interface is primarily used in specifying the {@link Traversal} optic.
  *
  * @param <S> The input object type.
  * @param <T> The output object type.

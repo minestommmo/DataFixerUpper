@@ -13,9 +13,8 @@ import com.mojang.datafixers.optics.profunctors.TraversalP;
 import java.util.function.Function;
 
 /**
- * A traversal is an optic that implements a structure-preserving transformation for (i.e. traverses over) some field
- * of an object. It provides functionality to traverse over some fields of a structure and to transform those fields
- * in the context of an effect.
+ * A traversal is an optic that implements access to and effectful modification of any number of fields of an object.
+ * All other optics can be implemented as specializations of {@code Traversal}.
  *
  * <p>The operation performed by traversals is analogous to {@link com.mojang.datafixers.kinds.Traversable},
  * which defines a structure-preserving transformation in the context of an effectful transformation.
@@ -55,10 +54,10 @@ public interface Traversal<S, T, A, B> extends Wander<S, T, A, B>, App2<Traversa
 
     /**
      * Produces a function that takes a transformation between field types and produces a transformation between
-     * object types. The returned function uses this traversal to traverse the object types and find each
+     * object types. The returned function uses this traversal to traverse the object types and transform each
      * applicable field.
      *
-     * @param proof The profunctor associated with this optic.
+     * @param proof The type class associated with this optic.
      * @param <P>   The transformation type.
      * @return A function from field transformations to object transformations.
      * @see Wander#wander(Applicative, FunctionType)
