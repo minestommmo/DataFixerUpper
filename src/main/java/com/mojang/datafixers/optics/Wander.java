@@ -8,22 +8,22 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.datafixers.kinds.K1;
 
 /**
- * A generalization of {@link com.mojang.datafixers.kinds.Traversable} for any object types, not just functors.
- * This interface is primarily used in specifying the {@link Traversal} optic.
+ * An interface related to {@link com.mojang.datafixers.kinds.Traversable}, but operating on an optic's object and
+ * field types rather than on a functor. This interface is primarily used in specifying the {@link Traversal} optic.
  *
  * @param <S> The input object type.
  * @param <T> The output object type.
  * @param <A> The input field type.
  * @param <B> The output field type.
  * @dfu.shape %.Type.[%0::%2,%1::%3]
+ * @see Traversal
  * @see com.mojang.datafixers.kinds.Traversable
  */
 public interface Wander<S, T, A, B> {
     /**
      * Takes the given {@link Applicative}-effectful function over the field types and produces an effectful function
-     * over the object types. The returned function traverses the structure {@code S}, applies the transformation to
-     * each field in {@code S}, and combines the resulting effects into a single effect containing the transformed
-     * object {@code T}.
+     * over the object types. The returned function applies the transformation to each field {@code A} in {@code S},
+     * and combines the resulting effects into a single effect containing the transformed object {@code T}.
      *
      * @param applicative The {@link Applicative} type class instance defining the behavior of {@code F}.
      * @param input       A function from the input field type to the output field type.

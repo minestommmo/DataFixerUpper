@@ -20,7 +20,7 @@ import java.util.function.Function;
  *
  * <p>An optic can be thought to take some transformation between field types and embed it into a transformation between
  * object types. The object type is also known as a <em>source</em>, and the field type is also known as a <em>focus</em>.
- * The terms "object" and "field" are used throughout in this documentation in order to draw a parallel to the
+ * The terms "object" and "field" are used throughout this documentation in order to draw a parallel to the
  * object-oriented paradigm. Note, however, that an optic need not act on a literal field of a conventional object,
  * and that optics need not act on a single field, depending on the profunctor this optic takes its behavior from.
  *

@@ -10,6 +10,7 @@ import java.util.List;
  * The monoid type class defines the {@link #add(Object, Object)} method for combining two objects.
  *
  * @param <T> The object type that this monoid instance handles.
+ * @dfu.shape %.Type. %0
  * @see <a href="https://en.wikipedia.org/wiki/Monoid">The monoid algebraic structure / type class</a>
  */
 public interface Monoid<T> {
